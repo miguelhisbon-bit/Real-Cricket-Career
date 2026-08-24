@@ -1,122 +1,19 @@
-export const TEAMS = [
-  {
-    id:"academy",
-    name:"Academy XI",
-    country:"Bangladesh",
-    level:1
-  },
-  {
-    id:"dhaka",
-    name:"Dhaka Warriors",
-    country:"Bangladesh",
-    level:2
-  },
-  {
-    id:"tigers",
-    name:"Bangladesh Tigers",
-    country:"Bangladesh",
-    level:3
-  },
-  {
-    id:"world",
-    name:"World XI",
-    country:"International",
-    level:4
-  }
+export const TEAMS=[
+ {name:"Academy XI",strength:56,color:0x31d98a},
+ {name:"City Warriors",strength:61,color:0x4bb4ff},
+ {name:"Capital Strikers",strength:66,color:0xffc857},
+ {name:"Riverside Royals",strength:59,color:0xff6b8cff}
 ];
-
-export const STADIUMS = [
-  {
-    name:"Green Valley Cricket Ground",
-    pitch:"balanced",
-    capacity:18000
-  },
-  {
-    name:"National Cricket Arena",
-    pitch:"flat",
-    capacity:42000
-  },
-  {
-    name:"Riverside Stadium",
-    pitch:"spin",
-    capacity:26000
-  }
-];
-
-export const ATTRIBUTES = {
-  batting:55,
-  power:48,
-  bowling:32,
-  fielding:48,
-  fitness:58,
-  mental:50
+export const SHOTS={
+ defend:{base:.80,risk:.04,desc:"Solid defence. You keep the ball down."},
+ drive:{base:.56,risk:.15,desc:"A clean drive through the infield."},
+ cut:{base:.48,risk:.18,desc:"You cut the ball square."},
+ pull:{base:.42,risk:.23,desc:"You take the bowler on with a pull."},
+ loft:{base:.34,risk:.34,desc:"You go aerial — high reward, high risk."}
 };
-
-export const TOURNAMENTS = [
-  {
-    name:"Academy T20",
-    level:1,
-    format:"T20"
-  },
-  {
-    name:"Domestic T20",
-    level:2,
-    format:"T20"
-  },
-  {
-    name:"National One Day",
-    level:3,
-    format:"ODI"
-  },
-  {
-    name:"World Cup",
-    level:4,
-    format:"ODI"
-  }
-];
-
-export const DEFAULT_PLAYER = () => ({
-  name:"Rookie",
-  age:18,
-  role:"Right Hand Batter",
-  team:"Academy XI",
-  overall:55,
-  energy:100,
-  form:50,
-  reputation:0,
-  money:500,
-  level:1,
-  xp:0,
-
-  skills:{
-    ...ATTRIBUTES
-  },
-
-  stats:{
-    matches:0,
-    runs:0,
-    balls:0,
-    fifties:0,
-    hundreds:0,
-    highScore:0,
-    wickets:0,
-    catches:0,
-    wins:0
-  },
-
-  recent:[],
-
-  news:[
-    {
-      title:"Career begins",
-      text:"Your academy journey has started. Train hard and earn your first selection.",
-      tag:"START"
-    }
-  ],
-
-  contract:{
-    name:"Academy Rookie",
-    salary:500,
-    remaining:8
-  }
-});
+export const BOWLS={
+ yorker:{wicket:.16,run:1,desc:"Perfect yorker attacks the stumps."},
+ length:{wicket:.09,run:2,desc:"Good length keeps the batter guessing."},
+ bouncer:{wicket:.12,run:2,desc:"Sharp bouncer forces a rushed shot."},
+ slower:{wicket:.14,run:1,desc:"Slower ball changes the pace."}
+};
