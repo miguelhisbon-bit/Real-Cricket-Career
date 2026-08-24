@@ -32,12 +32,12 @@
   </div>
   <div class="quickStats" id="quickStats"></div>
   <div class="grid">
-    <button data-action="profile">👤<b>Player</b><small>Profile & skills</small></button>
-    <button data-action="match">🏟️<b>Play Match</b><small>Full 20-over career match</small></button>
-    <button data-action="training">🏋️<b>Training</b><small>Improve your skills</small></button>
-    <button data-action="stats">📊<b>Career Stats</b><small>Records & form</small></button>
-    <button data-action="contract">💰<b>Contract</b><small>Career offers</small></button>
-    <button data-action="news">📰<b>News</b><small>Career events</small></button>
+    <button class="menuCard" data-action="profile"><span class="menuIcon">👤</span><b>Player</b><small>Profile & skills</small></button>
+    <button class="menuCard featured" data-action="match"><span class="menuIcon">🏟️</span><b>Play Match</b><small>Live T20 • 11 players</small><em>PLAY NOW</em></button>
+    <button class="menuCard" data-action="training"><span class="menuIcon">🏋️</span><b>Training</b><small>Improve your skills</small></button>
+    <button class="menuCard" data-action="stats"><span class="menuIcon">📊</span><b>Career Stats</b><small>Records & form</small></button>
+    <button class="menuCard" data-action="contract"><span class="menuIcon">💰</span><b>Contract</b><small>Career offers</small></button>
+    <button class="menuCard" data-action="news"><span class="menuIcon">📰</span><b>News</b><small>Career events</small></button>
   </div>
   <div class="panel journeyPanel">
     <div class="panelTitle"><h3>Career Journey</h3><span id="journeyStage">ACADEMY</span></div>
@@ -102,12 +102,18 @@
   </div>
 
   <div class="matchInfo">
-    <div class="playerTag"><span class="dot green"></span><b id="strikerName">PLAYER</b><small id="strikerMini">0* (0)</small></div>
+    <div class="playerTag activeTag"><span class="dot green"></span><b id="strikerName">PLAYER</b><small id="strikerMini">0* (0)</small></div>
     <div class="playerTag"><span class="dot gold"></span><b id="aiName">AI BATTER</b><small id="aiMini">AI</small></div>
     <div class="playerTag"><span class="dot red"></span><b id="bowlerName">AI BOWLER</b><small id="bowlerMini">PACE</small></div>
   </div>
+  <div class="liveFieldHUD">
+    <span id="strikeStatus">⚡ YOU ARE ON STRIKE</span>
+    <span id="deliveryText">READY</span>
+    <span id="fieldText">FIELD: BALANCED</span>
+  </div>
 
   <div class="commentary" id="commentary">Choose a batting shot.</div>
+  <div class="shotFeedback" id="shotFeedback">TIMING • READY</div>
   <div class="aiDecision" id="aiDecision">AI reading the situation…</div>
   <div class="ballIndicator" id="ballIndicator"><span></span></div>
 
@@ -134,7 +140,10 @@
 
   <div class="matchBottom">
     <div class="miniScore" id="miniScore">Player 0* • 0 balls</div>
-    <button class="exitGame" data-action="home">×</button>
+    <div class="bottomActions">
+      <button class="glassBtn" id="cameraBtn">🎥 CAMERA</button>
+      <button class="exitGame" data-action="home">×</button>
+    </div>
   </div>
 
   <div class="teamPanel" id="teamPanel">
@@ -161,6 +170,13 @@
   </div>
 </div>
 
+<nav class="mobileNav" id="mobileNav">
+  <button data-action="home">⌂<small>Home</small></button>
+  <button data-action="profile">👤<small>Player</small></button>
+  <button class="navPlay" data-action="match">🏏<small>Play</small></button>
+  <button data-action="stats">📊<small>Stats</small></button>
+  <button data-action="training">⚡<small>Train</small></button>
+</nav>
 <script type="module" src="game.js"></script>
 </body>
 </html>
