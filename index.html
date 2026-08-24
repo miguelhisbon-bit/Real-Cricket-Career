@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#061018">
-<title>Real Cricket Career — V2</title>
+<title>Real Cricket Career — V3</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="loading">
   <div class="loader-ball">🏏</div>
   <h1>REAL CRICKET <span>CAREER</span></h1>
-  <p>Loading career engine...</p>
+  <p>Loading 3D match engine...</p>
   <div class="loadbar"><i id="loadProgress"></i></div>
 </div>
 
@@ -30,18 +30,15 @@
     </div>
     <div class="ovrWrap"><span>OVR</span><div class="ovr" id="homeOvr">55</div></div>
   </div>
-
   <div class="quickStats" id="quickStats"></div>
-
   <div class="grid">
     <button data-action="profile">👤<b>Player</b><small>Profile & skills</small></button>
-    <button data-action="match">🏟️<b>Play Match</b><small>Bat • Bowl • Field</small></button>
+    <button data-action="match">🏟️<b>Play Match</b><small>Full 20-over career match</small></button>
     <button data-action="training">🏋️<b>Training</b><small>Improve your skills</small></button>
     <button data-action="stats">📊<b>Career Stats</b><small>Records & form</small></button>
     <button data-action="contract">💰<b>Contract</b><small>Career offers</small></button>
     <button data-action="news">📰<b>News</b><small>Career events</small></button>
   </div>
-
   <div class="panel journeyPanel">
     <div class="panelTitle"><h3>Career Journey</h3><span id="journeyStage">ACADEMY</span></div>
     <div id="journey"></div>
@@ -53,9 +50,7 @@
   <div class="profileCard">
     <div class="avatar" id="avatar">🏏</div>
     <div class="profileMain">
-      <h2 id="profileName">Rookie</h2>
-      <p id="profileRole">Right Hand Batter</p>
-      <strong id="profileTeam">Academy XI</strong>
+      <h2 id="profileName">Rookie</h2><p id="profileRole">Right Hand Batter</p><strong id="profileTeam">Academy XI</strong>
       <div class="pillRow"><span id="profileAge">18 yrs</span><span id="profileLevel">Level 1</span><span id="profileForm">Form 60</span></div>
     </div>
   </div>
@@ -65,7 +60,7 @@
 
 <section id="training" class="screen">
   <div class="sectionHead"><button data-action="home">←</button><h2>Training</h2></div>
-  <p class="muted">Training costs energy. Better fitness gives more sessions and better match performance.</p>
+  <p class="muted">Training costs energy. Recover after matches.</p>
   <div class="trainingGrid">
     <button data-train="batting">🏏<b>Batting</b><small>Timing + technique</small></button>
     <button data-train="power">💥<b>Power</b><small>Boundary hitting</small></button>
@@ -101,12 +96,19 @@
     <div class="scoreCard">
       <div class="teamLine"><b id="batTeam">ACADEMY XI</b><span id="inningsLabel">1ST INNINGS</span></div>
       <div class="scoreLine"><strong id="score">0/0</strong><span id="overs">0.0 ov</span></div>
-      <div class="targetLine"><span id="target">T20 • 120 target</span><span id="runRate">RR 0.00</span></div>
+      <div class="targetLine"><span id="target">YOU BAT FIRST • T20</span><span id="runRate">RR 0.00</span></div>
     </div>
     <div class="matchBadge"><span id="matchClock">00:00</span><b id="matchPhase">BATTING</b></div>
   </div>
 
+  <div class="matchInfo">
+    <div class="playerTag"><span class="dot green"></span><b id="strikerName">PLAYER</b><small id="strikerMini">0* (0)</small></div>
+    <div class="playerTag"><span class="dot gold"></span><b id="aiName">AI BATTER</b><small id="aiMini">AI</small></div>
+    <div class="playerTag"><span class="dot red"></span><b id="bowlerName">AI BOWLER</b><small id="bowlerMini">PACE</small></div>
+  </div>
+
   <div class="commentary" id="commentary">Choose a batting shot.</div>
+  <div class="aiDecision" id="aiDecision">AI reading the situation…</div>
   <div class="ballIndicator" id="ballIndicator"><span></span></div>
 
   <div class="shotPanel" id="shotPanel">
@@ -121,9 +123,9 @@
   </div>
 
   <div class="bowlPanel" id="bowlPanel">
-    <div class="controlTitle">BOWL — choose your delivery</div>
+    <div class="controlTitle">BOWL — AI is batting. Read the situation.</div>
     <div class="bowlControls">
-      <button data-bowl="yorker"><span>🎯</span><b>YORKER</b><small>Wicket chance</small></button>
+      <button data-bowl="yorker"><span>🎯</span><b>YORKER</b><small>Stumps</small></button>
       <button data-bowl="length"><span>⚡</span><b>LENGTH</b><small>Balanced</small></button>
       <button data-bowl="bouncer"><span>⬆️</span><b>BOUNCER</b><small>Pressure</small></button>
       <button data-bowl="slower"><span>🌀</span><b>SLOWER</b><small>Variation</small></button>
@@ -131,8 +133,13 @@
   </div>
 
   <div class="matchBottom">
-    <div class="miniScore" id="miniScore">Player 0* • 0 (0)</div>
+    <div class="miniScore" id="miniScore">Player 0* • 0 balls</div>
     <button class="exitGame" data-action="home">×</button>
+  </div>
+
+  <div class="teamPanel" id="teamPanel">
+    <div class="teamPanelHead"><b>🏏 11 PLAYERS ON THE FIELD</b><span id="teamCount">11/11</span></div>
+    <div id="teamPlayers"></div>
   </div>
 
   <div id="matchResult" class="resultOverlay">
