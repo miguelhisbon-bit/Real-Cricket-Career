@@ -1,292 +1,67 @@
-import {DEFAULT_PLAYER} from "./data.js";
-
-const KEY = "realCricketCareerV1";
-
+const KEY="rcc_career_v2";
+const DEFAULT_PLAYER={
+  name:"Rookie",age:18,role:"Right Hand Batter",team:"Academy XI",level:1,overall:55,form:60,
+  money:500,energy:100,contract:"Academy Scholarship",
+  skills:{batting:58,power:52,bowling:45,fielding:55,fitness:62,mental:58},
+  stats:{matches:0,runs:0,balls:0,highScore:0,wickets:0,wins:0,losses:0,fifties:0,hundreds:0,catches:0,sixes:0,fours:0},
+  recent:[],news:["Welcome to Academy XI. Your professional journey starts now."]
+};
+function deepClone(x){return JSON.parse(JSON.stringify(x))}
+function calcOverall(p){
+  const s=p.skills;
+  return Math.round(s.batting*.30+s.power*.15+s.bowling*.20+s.fielding*.12+s.fitness*.10+s.mental*.13);
+}
+export function fmt(n){return Number(n||0).toLocaleString("en-IN")}
 export class Career{
-
-  constructor(){
-    this.load();
-  }
-
+  constructor(){this.player=this.load()}
   load(){
-
-    try{
-      this.player =
-        JSON.parse(localStorage.getItem(KEY))
-        || DEFAULT_PLAYER();
-    }
-    catch{
-      this.player = DEFAULT_PLAYER();
-    }
-
-    this.recalc();
+    try{const raw=localStorage.getItem(KEY);if(raw){const p={...deepClone(DEFAULT_PLAYER),...JSON.parse(raw)};p.skills={...DEFAULT_PLAYER.skills,...p.skills};p.stats={...DEFAULT_PLAYER.stats,...p.stats};return p}}catch(e){}
+    return deepClone(DEFAULT_PLAYER)
   }
-
-  save(){
-    localStorage.setItem(
-      KEY,
-      JSON.stringify(this.player)
-    );
-
-    this.recalc();
+  save(){this.player.overall=calcOverall(this.player);localStorage.setItem(KEY,JSON.stringify(this.player))}
+  resetPlayer(data){
+    const p=deepClone(DEFAULT_PLAYER);Object.assign(p,data||{});
+    if(data?.skills)p.skills={...DEFAULT_PLAYER.skills,...data.skills};
+    this.player=p;this.save()
   }
-
-  reset(
-    name="Rookie",
-    role="Right Hand Batter"
-  ){
-
-    this.player = DEFAULT_PLAYER();
-
-    this.player.name =
-      name || "Rookie";
-
-    this.player.role =
-      role;
-
-    this.save();
-  }
-
-  recalc(){
-
-    const s = this.player.skills;
-
-    this.player.overall =
-      Math.round(
-        s.batting * .30 +
-        s.power * .12 +
-        s.bowling * .18 +
-        s.fielding * .12 +
-        s.fitness * .14 +
-        s.mental * .14
-      );
-  }
-
-  gainXP(amount){
-
-    this.player.xp += amount;
-
-    let needed =
-      100 + (this.player.level - 1) * 75;
-
-    while(
-      this.player.xp >= needed &&
-      this.player.level < 20
-    ){
-
-      this.player.xp -= needed;
-      this.player.level++;
-      this.player.reputation += 5;
-
-      needed =
-        100 + (this.player.level - 1) * 75;
-    }
-
-    this.player.energy =
-      Math.max(0,this.player.energy);
-
-    this.save();
-  }
-
   train(skill){
-
-    if(this.player.energy < 12){
-
-      return {
-        ok:false,
-        msg:"Not enough energy. Rest between matches."
-      };
-    }
-
-    this.player.energy -= 12;
-
-    const gain =
-      1 + Math.floor(Math.random()*3);
-
-    this.player.skills[skill] =
-      Math.min(
-        99,
-        this.player.skills[skill] + gain
-      );
-
-    this.player.form =
-      Math.min(
-        100,
-        this.player.form + 1
-      );
-
-    this.gainXP(15);
-
-    return {
-      ok:true,
-      msg:
-        skill[0].toUpperCase() +
-        skill.slice(1) +
-        " +" +
-        gain
-    };
-  }
-
-  recover(){
-
-    this.player.energy =
-      Math.min(
-        100,
-        this.player.energy + 25
-      );
-
-    this.player.form =
-      Math.max(
-        0,
-        this.player.form - 1
-      );
-
+    const p=this.player;
+    if(p.energy<18)return {ok:false,msg:"Not enough energy. Rest before another session."};
+    p.energy=Math.max(0,p.energy-18);
+    const gain=1+Math.floor(Math.random()*3);
+    p.skills[skill]=Math.min(99,p.skills[skill]+gain);
+    p.form=Math.min(99,p.form+1);
+    p.money=Math.max(0,p.money-20);
     this.save();
+    return {ok:true,msg:`${skill[0].toUpperCase()+skill.slice(1)} improved by +${gain}.`}
   }
-
-  finishMatch(result){
-
-    const p = this.player;
-
-    p.stats.matches++;
-
-    p.stats.runs += result.runs;
-
-    p.stats.balls += result.balls;
-
-    p.stats.wickets += result.wickets;
-
-    p.stats.catches += result.catches;
-
-    p.stats.highScore =
-      Math.max(
-        p.stats.highScore,
-        result.runs
-      );
-
-    if(result.runs >= 100){
-      p.stats.hundreds++;
-    }
-    else if(result.runs >= 50){
-      p.stats.fifties++;
-    }
-
-    if(result.win){
-      p.stats.wins++;
-    }
-
-    p.form =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          p.form +
-          (result.runs >= 30 ? 7 : -4)
-        )
-      );
-
-    p.energy =
-      Math.max(
-        0,
-        p.energy -
-        result.balls * .18 -
-        10
-      );
-
-    p.money +=
-      result.win ? 350 : 150;
-
-    p.news.unshift({
-      title:
-        result.win
-        ? "Victory!"
-        : "Match completed",
-
-      text:
-        `${p.name} scored ${result.runs} from ` +
-        `${result.balls} balls. ` +
-        `${result.wickets} wicket(s).`,
-
-      tag:
-        result.win
-        ? "WIN"
-        : "MATCH"
-    });
-
-    p.news =
-      p.news.slice(0,12);
-
-    this.gainXP(
-      40 + result.runs
-    );
-
-    this.updateTeam();
-
-    this.save();
+  recover(){this.player.energy=Math.min(100,this.player.energy+35);this.save()}
+  applyMatch(result){
+    const p=this.player,s=p.stats;
+    s.matches++;s.runs+=result.runs;s.balls+=result.balls;s.highScore=Math.max(s.highScore,result.runs);
+    s.wickets+=result.wickets;s.catches+=result.catches;s.sixes+=result.sixes;s.fours+=result.fours;
+    if(result.runs>=50&&result.runs<100)s.fifties++;
+    if(result.runs>=100)s.hundreds++;
+    result.win?s.wins++:s.losses++;
+    p.money+=result.win?180:70;
+    p.energy=Math.max(10,p.energy-25);
+    p.form=Math.max(20,Math.min(99,p.form+(result.win?4:-2)));
+    if(s.matches%5===0){p.level++;p.skills.batting=Math.min(99,p.skills.batting+1);p.skills.mental=Math.min(99,p.skills.mental+1)}
+    p.news.unshift(result.win?"Match win boosts your reputation.":"A tough match. Coaches want a stronger response next game.");
+    p.news=p.news.slice(0,8);
+    p.recent.unshift(result);
+    p.recent=p.recent.slice(0,8);
+    this.save()
   }
-
-  updateTeam(){
-
-    const p = this.player;
-
-    if(
-      p.overall >= 78 &&
-      p.level >= 10
-    ){
-
-      p.team = "World XI";
-      p.level =
-        Math.max(p.level,4);
-
-    }
-    else if(
-      p.overall >= 68 &&
-      p.level >= 6
-    ){
-
-      p.team =
-        "Bangladesh Tigers";
-
-      p.level =
-        Math.max(p.level,3);
-
-    }
-    else if(
-      p.overall >= 60 &&
-      p.level >= 3
-    ){
-
-      p.team =
-        "Dhaka Warriors";
-
-      p.level =
-        Math.max(p.level,2);
-    }
+  createOffer(){
+    const p=this.player;
+    const offers=[
+      {team:"City Warriors",role:"Right Hand Batter",money:1200},
+      {team:"Capital Strikers",role:"Batting All-Rounder",money:1600},
+      {team:"Riverside Royals",role:"Opening Batter",money:2000}
+    ];
+    return offers[Math.min(offers.length-1,Math.floor(p.overall/18))]
   }
-
-  contractOffer(){
-
-    const p = this.player;
-
-    const salary =
-      500 +
-      p.overall * 25 +
-      p.reputation * 10;
-
-    return {
-      name:
-        p.team +
-        " Professional Contract",
-
-      salary,
-
-      remaining:12
-    };
-  }
+  acceptOffer(offer){this.player.team=offer.team;this.player.role=offer.role;this.player.money+=offer.money;this.player.contract="Professional Contract";this.player.news.unshift(`Signed a professional contract with ${offer.team}.`);this.save()}
 }
-
-export function fmt(n){
-
-  return new Intl.NumberFormat()
-    .format(Math.round(n));
-}
+export function playerExists(){return !!localStorage.getItem(KEY)}
