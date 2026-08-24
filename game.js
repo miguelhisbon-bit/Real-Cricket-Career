@@ -1,1593 +1,179 @@
-import * as THREE
-from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import {Career,fmt} from "./career.js";
+import {TEAMS,SHOTS,BOWLS} from "./data.js";
 
-import {Career,fmt}
-from "./career.js";
-
-const career = new Career();
-
-let scene;
-let camera;
-let renderer;
-let clock;
-let animId;
-
-let ball;
-let batter;
-let bowler;
-
-let fielders = [];
-let pitch;
-
-let game = {};
-
-const $ = id =>
-  document.getElementById(id);
-
-const screens =
-  [...document.querySelectorAll(".screen")];
-
-
-/* -----------------------------
-   SCREEN SYSTEM
------------------------------ */
+const career=new Career();
+const $=id=>document.getElementById(id);
+const screens=[...document.querySelectorAll(".screen")];
+let scene,camera,renderer,clock,animId;
+let ball,batter,bowler,fielders=[];
+let game=null;
 
 function show(id){
-
-  screens.forEach(screen => {
-
-    screen.classList.toggle(
-      "active",
-      screen.id === id
-    );
-
-  });
-
-  if(id !== "match"){
-    stop3D();
-  }
-
-  if(id === "match"){
-    start3D();
-  }
-
+  screens.forEach(s=>s.classList.toggle("active",s.id===id));
+  if(id==="match") startMatch(); else stop3D();
   renderAll();
 }
-
-
-/* -----------------------------
-   CAREER UI
------------------------------ */
-
 function renderAll(){
-
-  const p = career.player;
-
-  $("topStats").textContent =
-    `Age ${p.age} • OVR ${p.overall} • ₹ ${fmt(p.money)}`;
-
-  $("homeName").textContent =
-    p.name;
-
-  $("homeOvr").textContent =
-    p.overall;
-
-  $("homeStatus").textContent =
-    `${p.team} • Level ${p.level} • Form ${Math.round(p.form)}`;
-
-  $("profileName").textContent =
-    p.name;
-
-  $("profileRole").textContent =
-    p.role;
-
-  $("profileTeam").textContent =
-    p.team;
-
-  $("avatar").textContent =
-    p.role.toLowerCase().includes("bowl")
-    ? "🎯"
-    : "🏏";
-
-
-  $("skills").innerHTML =
-    Object.entries(p.skills)
-    .map(([key,value]) => {
-
-      const label =
-        key[0].toUpperCase() +
-        key.slice(1);
-
-      return `
-        <div class="skill">
-
-          <div class="skillTop">
-            <b>${label}</b>
-            <strong>${value}</strong>
-          </div>
-
-          <div class="meter">
-            <i style="width:${value}%"></i>
-          </div>
-
-        </div>
-      `;
-
-    })
-    .join("");
-
-
-  $("energyBar").style.width =
-    p.energy + "%";
-
-  $("energyText").textContent =
-    `${Math.round(p.energy)} / 100`;
-
-
-  const stats = {
-
-    Matches:p.stats.matches,
-    Runs:p.stats.runs,
-    "High score":p.stats.highScore,
-    Wickets:p.stats.wickets,
-    Wins:p.stats.wins,
-    "50s":p.stats.fifties,
-    "100s":p.stats.hundreds,
-    Catches:p.stats.catches
-
-  };
-
-
-  $("careerStats").innerHTML =
-    Object.entries(stats)
-    .map(([key,value]) => {
-
-      return `
-        <div class="statCard">
-
-          <small>${key}</small>
-
-          <strong>
-            ${fmt(value)}
-          </strong>
-
-        </div>
-      `;
-
-    })
-    .join("");
-
-
-  $("recent").innerHTML =
-    p.recent.length
-
-    ? p.recent
-      .slice(0,8)
-      .map(match => {
-
-        return `
-          <div class="row">
-
-            <span>
-              ${match.label}
-            </span>
-
-            <b>
-              ${match.runs}/${match.wickets}
-            </b>
-
-          </div>
-        `;
-
-      })
-      .join("")
-
-    : `<p class="muted">
-         No matches yet.
-       </p>`;
-
-
-  $("newsList").innerHTML =
-    p.news
-    .map(news => {
-
-      return `
-        <div class="news">
-
-          <span class="tag">
-            ${news.tag}
-          </span>
-
-          <b>
-            ${news.title}
-          </b>
-
-          <span class="muted">
-            ${news.text}
-          </span>
-
-        </div>
-      `;
-
-    })
-    .join("");
-
-
-  $("journey").innerHTML = [
-
-    ["Academy",p.level >= 1],
-    ["Domestic",p.level >= 2],
-    ["National",p.level >= 3],
-    ["World stage",p.level >= 4]
-
-  ]
-
-  .map(item => {
-
-    return `
-      <div class="row">
-
-        <span>
-          ${item[1] ? "✅" : "🔒"}
-          ${item[0]}
-        </span>
-
-        <small>
-          ${item[1]
-            ? "Unlocked"
-            : "Keep improving"}
-        </small>
-
-      </div>
-    `;
-
-  })
-  .join("");
-
-
-  const offer =
-    career.contractOffer();
-
-  $("contractPanel").innerHTML = `
-
-    <h3>${p.team}</h3>
-
-    <div class="row">
-      <span>Current contract</span>
-      <b>${p.contract.name}</b>
-    </div>
-
-    <div class="row">
-      <span>Salary</span>
-      <b>₹ ${fmt(p.contract.salary)}</b>
-    </div>
-
-    <div class="row">
-      <span>Pro offer</span>
-      <b>₹ ${fmt(offer.salary)}</b>
-    </div>
-
-    <button
-      class="primary"
-      id="acceptContract">
-      Accept new contract
-    </button>
-
-  `;
-
-
-  setTimeout(() => {
-
-    $("acceptContract")
-    ?.addEventListener(
-      "click",
-      () => {
-
-        p.contract = offer;
-
-        p.money += offer.salary;
-
-        career.save();
-
-        renderAll();
-
-        toast("Contract signed!");
-
-      }
-    );
-
-  });
+  const p=career.player;
+  $("topStats").textContent=`Age ${p.age} • OVR ${p.overall} • ₹ ${fmt(p.money)}`;
+  $("homeName").textContent=p.name;$("homeOvr").textContent=p.overall;
+  $("homeStatus").textContent=`${p.team} • Level ${p.level} • Form ${Math.round(p.form)} • ${p.contract}`;
+  $("profileName").textContent=p.name;$("profileRole").textContent=p.role;$("profileTeam").textContent=p.team;
+  $("profileAge").textContent=`${p.age} yrs`;$("profileLevel").textContent=`Level ${p.level}`;$("profileForm").textContent=`Form ${Math.round(p.form)}`;
+  $("avatar").textContent=p.role.toLowerCase().includes("bowl")?"🎯":"🏏";
+  $("skills").innerHTML=Object.entries(p.skills).map(([k,v])=>`<div class="skill"><div class="skillTop"><b>${k[0].toUpperCase()+k.slice(1)}</b><strong>${v}</strong></div><div class="meter"><i style="width:${v}%"></i></div></div>`).join("");
+  $("energyBar").style.width=p.energy+"%";$("energyText").textContent=`${Math.round(p.energy)} / 100`;
+  const st={Matches:p.stats.matches,Runs:p.stats.runs,"High score":p.stats.highScore,Wickets:p.stats.wickets,Wins:p.stats.wins,"50s":p.stats.fifties,"100s":p.stats.hundreds,Catches:p.stats.catches};
+  $("careerStats").innerHTML=Object.entries(st).map(([k,v])=>`<div class="statCard"><small>${k}</small><strong>${fmt(v)}</strong></div>`).join("");
+  $("recent").innerHTML=p.recent.length?p.recent.map(r=>`<div class="row"><span>${r.opponent}<br><small>${r.runs} (${r.balls}) • ${r.wickets} wkts</small></span><b>${r.win?"WIN":"LOSS"}</b></div>`).join(""):"<p class='muted'>No matches played yet.</p>";
+  $("quickStats").innerHTML=[
+    ["Runs",p.stats.runs],["Matches",p.stats.matches],["Best",p.stats.highScore],["Form",Math.round(p.form)]
+  ].map(x=>`<div class="quickStat"><small>${x[0]}</small><b>${fmt(x[1])}</b></div>`).join("");
+  $("journeyStage").textContent=p.team.toUpperCase();
+  const milestones=[
+    ["Academy debut",p.stats.matches>=1],
+    ["First 50",p.stats.fifties>=1],
+    ["First 100",p.stats.hundreds>=1],
+    ["Professional contract",p.contract!=="Academy Scholarship"],
+    ["Career level 5",p.level>=5]
+  ];
+  $("journey").innerHTML=milestones.map(([t,done])=>`<div class="journeyItem"><span class="journeyDot" style="opacity:${done?1:.3}"></span><span>${t}</span><b class="${done?"":"muted"}">${done?"✓":"LOCKED"}</b></div>`).join("");
+  const offer=career.createOffer();
+  $("contractPanel").innerHTML=p.contract==="Academy Scholarship"
+    ?`<h3>Next opportunity</h3><p class="muted">Your current level is ${p.level}. A strong run of matches can unlock a professional deal.</p><div class="row"><span>Offer</span><b>${offer.team}</b></div><div class="row"><span>Role</span><b>${offer.role}</b></div><div class="row"><span>Signing bonus</span><b>₹ ${fmt(offer.money)}</b></div><button class="primary" id="acceptOffer">Accept offer</button>`
+    :`<h3>Professional Contract</h3><p class="muted">You are contracted to ${p.team} as ${p.role}.</p><div class="row"><span>Status</span><b class="tag">ACTIVE</b></div>`;
+  $("newsList").innerHTML=p.news.map((n,i)=>`<div class="news"><b>${i===0?"LATEST":"CAREER UPDATE"}</b><span>${n}</span></div>`).join("");
+  $("acceptOffer")?.addEventListener("click",()=>{career.acceptOffer(offer);renderAll();show("home")});
 }
-
-
-/* -----------------------------
-   NOTIFICATION
------------------------------ */
-
-function toast(text){
-
-  $("message").textContent =
-    text;
-}
-
-
-/* -----------------------------
-   CREATE PLAYER
------------------------------ */
-
 function openCreate(){
-
-  modal(`
-
-    <h2>Create Player</h2>
-
-    <div class="form">
-
-      <label>Name</label>
-
-      <input
-        id="newName"
-        maxlength="20"
-        value="${career.player.name}">
-
-      <label>Role</label>
-
-      <select id="newRole">
-
-        <option>
-          Right Hand Batter
-        </option>
-
-        <option>
-          Left Hand Batter
-        </option>
-
-        <option>
-          Fast Bowler
-        </option>
-
-        <option>
-          Spin Bowler
-        </option>
-
-        <option>
-          All Rounder
-        </option>
-
-      </select>
-
-      <button
-        class="primary"
-        id="savePlayer">
-
-        Start Career
-
-      </button>
-
-    </div>
-
-  `);
-
-
-  $("savePlayer").onclick =
-    () => {
-
-      career.reset(
-        $("newName").value,
-        $("newRole").value
-      );
-
-      closeModal();
-
-      renderAll();
-
-      toast("Career created");
-    };
-}
-
-
-/* -----------------------------
-   MODAL
------------------------------ */
-
-function modal(html){
-
-  $("modalContent").innerHTML =
-    html;
-
-  $("modal")
-    .classList.add("show");
-}
-
-function closeModal(){
-
-  $("modal")
-    .classList.remove("show");
-}
-
-
-/* -----------------------------
-   START MATCH
------------------------------ */
-
-function startMatch(){
-
-  show("match");
-
-  game = {
-
-    over:0,
-    balls:0,
-    runs:0,
-    wickets:0,
-
-    target:120,
-
-    batting:true,
-
-    score:0,
-
-    inningsBalls:0,
-
-    lastResult:null,
-
-    ended:false,
-
-    pendingShot:null
-
+  $("modalContent").innerHTML=`<h2>Create Your Player</h2><p class="muted">This will save automatically on this device.</p><div class="form"><label>Name</label><input id="playerName" maxlength="22" value="${career.player.name==="Rookie"?"":career.player.name}"><label>Role</label><select id="playerRole"><option>Right Hand Batter</option><option>Left Hand Batter</option><option>Batting All-Rounder</option><option>Bowling All-Rounder</option></select><button class="primary" id="savePlayer">Create Player</button></div>`;
+  $("modal").classList.add("show");
+  $("savePlayer").onclick=()=>{
+    const name=$("playerName").value.trim()||"Rookie";const role=$("playerRole").value;
+    career.resetPlayer({name,role});$("modal").classList.remove("show");renderAll();show("home");
   };
-
-  updateHUD();
-
-  toast(
-    "Choose your shot when the ball arrives"
-  );
 }
-
-
-/* -----------------------------
-   THREE.JS SETUP
------------------------------ */
-
-function init3D(){
-
-  scene =
-    new THREE.Scene();
-
-  scene.background =
-    new THREE.Color(0x7bb6d9);
-
-  scene.fog =
-    new THREE.Fog(
-      0x7bb6d9,
-      35,
-      95
-    );
-
-
-  camera =
-    new THREE.PerspectiveCamera(
-      55,
-      innerWidth / innerHeight,
-      .1,
-      150
-    );
-
-  camera.position.set(
-    0,
-    6.5,
-    15
-  );
-
-  camera.lookAt(
-    0,
-    2,
-    0
-  );
-
-
-  renderer =
-    new THREE.WebGLRenderer({
-
-      canvas:$("gameCanvas"),
-
-      antialias:true,
-
-      powerPreference:
-        "high-performance"
-
-    });
-
-
-  renderer.setPixelRatio(
-    Math.min(devicePixelRatio,1.7)
-  );
-
-  renderer.setSize(
-    innerWidth,
-    innerHeight - 64
-  );
-
-  renderer.shadowMap.enabled = true;
-
-  renderer.shadowMap.type =
-    THREE.PCFSoftShadowMap;
-
-
-  const hemi =
-    new THREE.HemisphereLight(
-      0xffffff,
-      0x31543c,
-      2
-    );
-
-  scene.add(hemi);
-
-
-  const sun =
-    new THREE.DirectionalLight(
-      0xffffff,
-      3
-    );
-
-  sun.position.set(
-    -12,
-    18,
-    10
-  );
-
-  sun.castShadow = true;
-
-  scene.add(sun);
-
-
-  buildStadium();
-}
-
-
-/* -----------------------------
-   3D MATERIAL HELPERS
------------------------------ */
-
-function mat(color){
-
-  return new THREE.MeshStandardMaterial({
-
-    color,
-
-    roughness:.72,
-
-    metalness:.05
-
-  });
-}
-
-
-function box(
-  width,
-  height,
-  depth,
-  color
-){
-
-  const mesh =
-    new THREE.Mesh(
-      new THREE.BoxGeometry(
-        width,
-        height,
-        depth
-      ),
-      mat(color)
-    );
-
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-
-  return mesh;
-}
-
-
-function cyl(
-  radius,
-  height,
-  color
-){
-
-  const mesh =
-    new THREE.Mesh(
-      new THREE.CylinderGeometry(
-        radius,
-        radius,
-        height,
-        16
-      ),
-      mat(color)
-    );
-
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-
-  return mesh;
-}
-
-
-/* -----------------------------
-   STADIUM
------------------------------ */
-
-function buildStadium(){
-
-  const grass =
-    new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        100,
-        100
-      ),
-      mat(0x356b3d)
-    );
-
-  grass.rotation.x =
-    -Math.PI / 2;
-
-  scene.add(grass);
-
-
-  const outfield =
-    new THREE.Mesh(
-      new THREE.CylinderGeometry(
-        26,
-        26,
-        .3,
-        64
-      ),
-      mat(0x2d6338)
-    );
-
-  outfield.position.y =
-    .15;
-
-  scene.add(outfield);
-
-
-  pitch =
-    new THREE.Mesh(
-      new THREE.BoxGeometry(
-        3,
-        .08,
-        26
-      ),
-      mat(0xc6a96b)
-    );
-
-  pitch.position.y =
-    .32;
-
-  scene.add(pitch);
-
-
-  for(let i=0;i<32;i++){
-
-    const angle =
-      i / 32 * Math.PI * 2;
-
-    const radius = 25;
-
-    const stand =
-      box(
-        7,
-        4,
-        2,
-        0x354452
-      );
-
-    stand.position.set(
-      Math.cos(angle) * radius,
-      2,
-      Math.sin(angle) * radius
-    );
-
-    stand.lookAt(
-      0,
-      2,
-      0
-    );
-
-    scene.add(stand);
-  }
-
-
-  batter =
-    makePlayer(0xeeeeee);
-
-  batter.position.set(
-    0,
-    1.2,
-    8
-  );
-
-  batter.rotation.y =
-    Math.PI;
-
-  scene.add(batter);
-
-
-  bowler =
-    makePlayer(0x2266cc);
-
-  bowler.position.set(
-    0,
-    1.2,
-    -8
-  );
-
-  scene.add(bowler);
-
-
-  for(let i=0;i<8;i++){
-
-    const fielder =
-      makePlayer(0xd34b4b);
-
-    const angle =
-      i / 8 * Math.PI * 2;
-
-    fielder.position.set(
-      Math.sin(angle) * 9,
-      1.1,
-      Math.cos(angle) * 9
-    );
-
-    fielder.scale.setScalar(.8);
-
-    scene.add(fielder);
-
-    fielders.push(fielder);
-  }
-}
-
-
-/* -----------------------------
-   PLAYER MODEL
------------------------------ */
-
-function makePlayer(color){
-
-  const group =
-    new THREE.Group();
-
-
-  const body =
-    cyl(
-      .38,
-      1.15,
-      color
-    );
-
-  body.position.y = 0;
-
-  group.add(body);
-
-
-  const head =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        .3,
-        16,
-        12
-      ),
-      mat(0xb87852)
-    );
-
-  head.position.y =
-    .8;
-
-  group.add(head);
-
-
-  const leg1 =
-    box(
-      .14,
-      .8,
-      .16,
-      0x20242a
-    );
-
-  leg1.position.set(
-    -.16,
-    -.75,
-    0
-  );
-
-  group.add(leg1);
-
-
-  const leg2 =
-    leg1.clone();
-
-  leg2.position.x =
-    .16;
-
-  group.add(leg2);
-
-
-  return group;
-}
-
-
-/* -----------------------------
-   BALL
------------------------------ */
-
-function throwBall(){
-
-  if(
-    game.over >= 5 ||
-    game.inningsBalls >= 30
-  ){
-
-    endMatch();
-
-    return;
-  }
-
-
-  game.inningsBalls++;
-  game.balls++;
-
-
-  ball =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        .11,
-        12,
-        12
-      ),
-      mat(0x8d1010)
-    );
-
-
-  ball.position.set(
-    (Math.random()-.5)*1.2,
-    2,
-    -7
-  );
-
-
-  scene.add(ball);
-
-
-  setTimeout(() => {
-
-    if(!game.batting)
-      return;
-
-    toast("SHOT NOW!");
-
-  },700);
-
-
-  const start =
-    performance.now();
-
-
-  const startPos =
-    ball.position.clone();
-
-
-  const endPos =
-    new THREE.Vector3(
-      (Math.random()-.5)*.7,
-      1.1,
-      7
-    );
-
-
-  function travel(){
-
-    if(!ball)
-      return;
-
-
-    const t =
-      Math.min(
-        (performance.now()-start)/850,
-        1
-      );
-
-
-    ball.position.lerpVectors(
-      startPos,
-      endPos,
-      t
-    );
-
-
-    if(t >= 1){
-
-      resolveShot(
-        game.pendingShot || "defend"
-      );
-
-      game.pendingShot =
-        null;
-
-      return;
-    }
-
-
-    requestAnimationFrame(
-      travel
-    );
-  }
-
-
-  travel();
-}
-
-
-/* -----------------------------
-   SHOT RESOLUTION
------------------------------ */
-
-function resolveShot(shot){
-
-  if(!ball)
-    return;
-
-
-  const p =
-    career.player;
-
-
-  const skill =
-    p.skills.batting;
-
-  const power =
-    p.skills.power;
-
-
-  const roll =
-    Math.random() * 100;
-
-
-  let runs = 0;
-  let wicket = 0;
-  const balls = 1;
-
-
-  const quality =
-    skill * .55 +
-    power * .25 +
-    p.form * .20;
-
-
-  const bonuses = {
-
-    defend:-8,
-    drive:8,
-    cut:5,
-    pull:7,
-    loft:14
-
-  };
-
-
-  const q =
-    quality +
-    bonuses[shot];
-
-
-  if(
-    roll <
-    Math.max(
-      5,
-      7 - (q-50)*.08
-    )
-  ){
-
-    wicket = 1;
-
-    toast("WICKET!");
-
-  }
-  else{
-
-    const x =
-      Math.random()*100;
-
-
-    if(
-      shot === "loft" &&
-      x < 35
-    ){
-
-      runs = 6;
-
-    }
-    else if(
-      x <
-      18 + (q > 65 ? 8 : 0)
-    ){
-
-      runs = 4;
-
-    }
-    else if(x < 42){
-
-      runs = 2;
-
-    }
-    else if(x < 65){
-
-      runs = 1;
-
-    }
-    else{
-
-      runs = 0;
-
-    }
-
-
-    if(runs === 6)
-      toast("SIX!");
-
-    else if(runs === 4)
-      toast("FOUR!");
-
-    else if(runs)
-      toast("RUN!");
-
-    else
-      toast("DOT BALL");
-  }
-
-
-  game.runs += runs;
-
-  game.wickets += wicket;
-
-  game.score =
-    game.runs;
-
-
-  game.lastResult = {
-    r:runs,
-    w:wicket,
-    b:balls
-  };
-
-
-  if(ball){
-
-    scene.remove(ball);
-
-    ball = null;
-  }
-
-
-  updateHUD();
-
-
-  if(
-    wicket ||
-    game.inningsBalls >= 30
-  ){
-
-    setTimeout(
-      endMatch,
-      900
-    );
-
-  }
-  else{
-
-    setTimeout(
-      () => {
-
-        game.pendingShot =
-          null;
-
-        throwBall();
-
-      },
-      600
-    );
-  }
-}
-
-
-/* -----------------------------
-   SCOREBOARD
------------------------------ */
-
-function updateHUD(){
-
-  const balls =
-    game.inningsBalls || 0;
-
-
-  const overs =
-    Math.floor(balls/6) +
-    "." +
-    (balls%6);
-
-
-  $("score").textContent =
-    `${game.runs}/${game.wickets}`;
-
-
-  $("overs").textContent =
-    `${overs} ov`;
-
-
-  $("target").textContent =
-    `T20 • ${Math.max(
-      0,
-      game.target-game.runs
-    )} needed`;
-
-
-  $("batTeam").textContent =
-    career.player.team.toUpperCase();
-}
-
-
-/* -----------------------------
-   MATCH END
------------------------------ */
-
-function endMatch(){
-
-  if(game.ended)
-    return;
-
-
-  game.ended = true;
-
-
-  const win =
-    game.runs >= game.target;
-
-
-  const result = {
-
-    runs:game.runs,
-
-    balls:game.inningsBalls,
-
-    wickets:game.wickets,
-
-    catches:
-      Math.random() < .25
-      ? 1
-      : 0,
-
-    win
-
-  };
-
-
-  career.finishMatch(
-    result
-  );
-
-
-  career.player.recent.unshift({
-
-    label:
-      `${new Date().toLocaleDateString()} • ` +
-      `${win ? "Win" : "Loss"}`,
-
-    runs:
-      game.runs,
-
-    wickets:
-      game.wickets
-
-  });
-
-
-  career.player.recent =
-    career.player.recent.slice(
-      0,
-      10
-    );
-
-
-  career.save();
-
-
-  modal(`
-
-    <h2>
-      ${win
-        ? "🏆 Victory!"
-        : "🏏 Match Complete"}
-    </h2>
-
-    <p>
-      You scored
-      <b>${game.runs}</b>
-      from
-      <b>${game.inningsBalls}</b>
-      balls.
-    </p>
-
-    <div class="row">
-      <span>Result</span>
-      <b>${win ? "WIN" : "LOSS"}</b>
-    </div>
-
-    <div class="row">
-      <span>XP</span>
-      <b>+${40+game.runs}</b>
-    </div>
-
-    <div class="row">
-      <span>Career money</span>
-      <b>₹ ${fmt(career.player.money)}</b>
-    </div>
-
-    <button
-      class="primary"
-      id="backCareer">
-
-      Continue Career
-
-    </button>
-
-  `);
-
-
-  $("backCareer").onclick =
-    () => {
-
-      closeModal();
-
-      show("home");
-
-    };
-}
-
-
-/* -----------------------------
-   3D LOOP
------------------------------ */
-
-function start3D(){
-
-  if(!renderer)
-    init3D();
-
-
-  cancelAnimationFrame(
-    animId
-  );
-
-
-  clock.start();
-
+function setup3D(){
+  const canvas=$("gameCanvas");
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight-64,false);
+  renderer.shadowMap.enabled=true;
+  scene=new THREE.Scene();scene.background=new THREE.Color(0x07170e);
+  scene.fog=new THREE.Fog(0x07170e,28,80);
+  camera=new THREE.PerspectiveCamera(50,innerWidth/(innerHeight-64),.1,150);
+  camera.position.set(0,8,18);camera.lookAt(0,0,0);
+  clock=new THREE.Clock();
+  const hemi=new THREE.HemisphereLight(0xc9e9ff,0x17351f,2.1);scene.add(hemi);
+  const sun=new THREE.DirectionalLight(0xffffff,2.6);sun.position.set(12,20,8);sun.castShadow=true;scene.add(sun);
+  makeStadium();
   animate();
 }
-
-
-function stop3D(){
-
-  if(animId)
-    cancelAnimationFrame(
-      animId
-    );
-
-
-  if(ball && scene){
-
-    scene.remove(ball);
-
-    ball = null;
+function makeStadium(){
+  const ground=new THREE.Mesh(new THREE.CylinderGeometry(27,27,.5,96),new THREE.MeshStandardMaterial({color:0x1c6a3b,roughness:.9}));
+  ground.position.y=-.3;ground.scale.z=.82;ground.receiveShadow=true;scene.add(ground);
+  const inner=new THREE.Mesh(new THREE.CylinderGeometry(17,17,.12,96),new THREE.MeshStandardMaterial({color:0x3f9b51,roughness:1}));
+  inner.position.y=.0;inner.scale.z=.8;scene.add(inner);
+  const pitchMesh=new THREE.Mesh(new THREE.BoxGeometry(3.4,.12,24),new THREE.MeshStandardMaterial({color:0xb89b68,roughness:1}));
+  pitchMesh.position.y=.08;scene.add(pitchMesh);
+  const lineMat=new THREE.MeshBasicMaterial({color:0xffffff});
+  [-9.5,9.5].forEach(z=>{const l=new THREE.Mesh(new THREE.BoxGeometry(3.8,.03,.08),lineMat);l.position.set(0,.16,z);scene.add(l)});
+  [-1.55,1.55].forEach(x=>{const l=new THREE.Mesh(new THREE.BoxGeometry(.05,.03,24),lineMat);l.position.set(x,.16,0);scene.add(l)});
+  const stumpsMat=new THREE.MeshStandardMaterial({color:0xe7dfc9});
+  [-.22,0,.22].forEach(x=>{const s=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.9,10),stumpsMat);s.position.set(x,.52,-9.2);scene.add(s)});
+  batter=new THREE.Mesh(new THREE.CapsuleGeometry(.34,.9,5,10),new THREE.MeshStandardMaterial({color:0x1762a0}));
+  batter.position.set(0,1,-8.2);batter.castShadow=true;scene.add(batter);
+  bowler=new THREE.Mesh(new THREE.CapsuleGeometry(.32,.9,5,10),new THREE.MeshStandardMaterial({color:0xe85d55}));
+  bowler.position.set(0,1,8.5);bowler.castShadow=true;scene.add(bowler);
+  fielders=[];
+  const positions=[[-10,1,-2],[10,1,-2],[-7,1,7],[7,1,7],[-13,1,5],[13,1,5],[-15,1,-9],[15,1,-9]];
+  positions.forEach(pos=>{const f=new THREE.Mesh(new THREE.CapsuleGeometry(.25,.7,4,8),new THREE.MeshStandardMaterial({color:0xf0b53b}));f.position.set(...pos);f.castShadow=true;scene.add(f);fielders.push(f)});
+  for(let i=0;i<28;i++){const a=i/28*Math.PI*2;const r=22;const seat=new THREE.Mesh(new THREE.BoxGeometry(1.1,.5,1),new THREE.MeshStandardMaterial({color:i%2?0x263e4c:0x314e5b}));seat.position.set(Math.cos(a)*r,.5,Math.sin(a)*r*.82);seat.lookAt(0,.5,0);scene.add(seat)}
+}
+function animate(){animId=requestAnimationFrame(animate);if(!renderer)return;const t=clock?.getElapsedTime()||0;if(batter)batter.rotation.y=Math.sin(t*.8)*.03;if(bowler)bowler.rotation.y=Math.sin(t*.65)*.03;fielders.forEach((f,i)=>f.rotation.y=Math.sin(t*.5+i)*.04);renderer.render(scene,camera)}
+function stop3D(){if(animId)cancelAnimationFrame(animId);animId=null}
+function resize3D(){if(renderer&&camera){renderer.setSize(innerWidth,Math.max(1,innerHeight-64),false);camera.aspect=innerWidth/Math.max(1,innerHeight-64);camera.updateProjectionMatrix()}}
+function startMatch(){
+  $("matchResult").classList.remove("show");$("shotPanel").style.display="block";$("bowlPanel").style.display="none";
+  game={balls:0,runs:0,wickets:0,playerBalls:0,playerRuns:0,fours:0,sixes:0,bowlWickets:0,catches:0,target:120,phase:"bat",opponent:TEAMS[1+Math.floor(Math.random()*3)],start:Date.now()};
+  if(!renderer)setup3D(); else animate();
+  updateMatchUI();comment("Choose your batting shot.");
+}
+function updateMatchUI(){
+  if(!game)return;
+  const ov=Math.floor(game.balls/6)+"."+game.balls%6;
+  $("score").textContent=`${game.runs}/${game.wickets}`;$("overs").textContent=`${ov} ov`;
+  $("target").textContent=`T20 • ${game.target} target`;$("runRate").textContent=`RR ${game.balls?(game.runs/(game.balls/6)).toFixed(2):"0.00"}`;
+  $("batTeam").textContent=career.player.team.toUpperCase();$("inningsLabel").textContent=game.phase==="bat"?"1ST INNINGS":"2ND INNINGS";
+  $("matchPhase").textContent=game.phase==="bat"?"BATTING":"BOWLING";
+  $("miniScore").textContent=`${career.player.name} ${game.playerRuns}* • ${game.playerBalls} balls`;
+  $("shotPanel").style.display=game.phase==="bat"?"block":"none";$("bowlPanel").style.display=game.phase==="bowl"?"block":"none";
+}
+function comment(text){$("commentary").textContent=text}
+function animateBall(wicket=false){
+  const el=$("ballIndicator");el.classList.remove("animate","wicket");void el.offsetWidth;el.classList.add("animate");if(wicket)el.classList.add("wicket");
+}
+function battingShot(type){
+  if(!game||game.phase!=="bat")return;
+  const p=career.player,s=SHOTS[type];
+  game.playerBalls++;game.balls++;
+  const timing=(p.skills.batting+p.skills.mental+p.form)/3;
+  const power=p.skills.power;
+  const defence=Math.random();
+  let outcome;
+  const wicketChance=Math.max(.025,s.risk*(1.12-timing/130)+(game.wickets*.008));
+  if(defence<wicketChance){game.wickets++;outcome="WICKET";animateBall(true);comment(`${s.desc} Edge! ${career.player.name} is OUT.`)}
+  else{
+    let r=Math.random();
+    const quality=(timing/100)*.65+(power/100)*.35;
+    if(type==="defend") outcome=r<.72?0:(r<.94?1:2);
+    else if(type==="drive") outcome=r<.27?0:(r<.64?1:(r<.86?2:(r<.97?4:6)));
+    else if(type==="cut") outcome=r<.24?0:(r<.56?1:(r<.76?2:(r<.95?4:6)));
+    else if(type==="pull") outcome=r<.18?0:(r<.46?1:(r<.68?2:(r<.89?4:6)));
+    else outcome=r<.12?0:(r<.34?1:(r<.53?2:(r<.78?4:6)));
+    if(Math.random()<quality*.05)outcome=Math.min(6,outcome+1);
+    game.runs+=outcome;game.playerRuns+=outcome;if(outcome===4)game.fours++;if(outcome===6)game.sixes++;
+    animateBall(false);comment(`${s.desc} ${outcome===0?"Dot ball.":outcome===4?"FOUR!":outcome===6?"SIX!":`${outcome} run${outcome>1?"s":""}.`}`)
+  }
+  afterBall();
+}
+function bowling(type){
+  if(!game||game.phase!=="bowl")return;
+  const p=career.player,b=BOWLS[type];game.balls++;
+  const strength=(p.skills.bowling+p.skills.mental+p.skills.fitness)/3;
+  const wk=Math.min(.35,b.wicket*(.7+strength/100));
+  const isWicket=Math.random()<wk;
+  if(isWicket){game.wickets++;game.bowlWickets++;animateBall(true);comment(`${b.desc} OUT! Excellent bowling.`)}
+  else{const r=Math.random();const runs=r<.42?0:r<.75?1:r<.91?2:r<.98?4:6;game.runs+=runs;animateBall(false);comment(`${b.desc} ${runs===0?"Dot ball.":`${runs} run${runs>1?"s":""} conceded.`}`)}
+  afterBall();
+}
+function afterBall(){
+  updateMatchUI();
+  if(game.phase==="bat"){
+    if(game.wickets>=5||game.balls>=120||game.runs>=game.target){game.phase="bowl";game.balls=0;game.runs=0;game.wickets=0;comment(`You scored ${game.playerRuns}. Defend ${game.playerRuns} in the second innings.`);updateMatchUI()}
+  }else if(game.balls>=120||game.wickets>=5||game.runs>game.playerRuns){
+    finishMatch();
   }
 }
-
-
-function animate(){
-
-  animId =
-    requestAnimationFrame(
-      animate
-    );
-
-
-  const dt =
-    clock.getDelta();
-
-
-  if(scene){
-
-    if(batter){
-
-      batter.rotation.y =
-        Math.sin(
-          performance.now()*.001
-        )*.02;
-
-    }
-
-
-    if(bowler){
-
-      bowler.position.y =
-        1.2 +
-        Math.sin(
-          performance.now()*.004
-        )*.05;
-
-    }
-
-
-    renderer.render(
-      scene,
-      camera
-    );
-  }
+function finishMatch(){
+  const win=game.runs<game.playerRuns;
+  const result={win,runs:game.playerRuns,balls:game.playerBalls,wickets:game.bowlWickets,catches:game.catches,sixes:game.sixes,fours:game.fours,opponent:game.opponent.name};
+  career.applyMatch(result);renderAll();
+  $("resultIcon").textContent=win?"🏆":"💪";$("resultTitle").textContent=win?"MATCH WON!":"MATCH LOST";
+  $("resultText").textContent=win?`Brilliant performance against ${game.opponent.name}.`:`A competitive effort against ${game.opponent.name}.`;
+  $("resultStats").innerHTML=[["Runs",game.playerRuns],["Balls",game.playerBalls],["Wickets",game.bowlWickets]].map(x=>`<div class="resultStat"><small>${x[0]}</small><b>${x[1]}</b></div>`).join("");
+  $("matchResult").classList.add("show");
 }
-
-
-/* -----------------------------
-   SHOT INPUT
------------------------------ */
-
-function handleShot(shot){
-
-  if(
-    !game ||
-    game.ended ||
-    !game.batting
-  )
-    return;
-
-
-  if(game.pendingShot){
-
-    toast("Wait for the ball");
-
-    return;
-  }
-
-
-  game.pendingShot =
-    shot;
-
-  throwBall();
-}
-
-
-/* -----------------------------
-   CLICK EVENTS
------------------------------ */
-
-document.addEventListener(
-  "click",
-  event => {
-
-    const action =
-      event.target.closest(
-        "[data-action]"
-      );
-
-
-    if(action){
-
-      const act =
-        action.dataset.action;
-
-
-      if(act === "home"){
-
-        show("home");
-
-      }
-      else if(act === "create"){
-
-        openCreate();
-
-      }
-      else if(act === "match"){
-
-        startMatch();
-
-      }
-      else{
-
-        show(act);
-
-      }
-
-      return;
-    }
-
-
-    const training =
-      event.target.closest(
-        "[data-train]"
-      );
-
-
-    if(training){
-
-      const result =
-        career.train(
-          training.dataset.train
-        );
-
-
-      toast(result.msg);
-
-      renderAll();
-
-      return;
-    }
-
-
-    const shot =
-      event.target.closest(
-        "[data-shot]"
-      );
-
-
-    if(shot){
-
-      handleShot(
-        shot.dataset.shot
-      );
-
-      return;
-    }
-
-
-    const bowl =
-      event.target.closest(
-        "[data-bowl]"
-      );
-
-
-    if(bowl){
-
-      toast(
-        "Bowling mode is coming in the next gameplay module."
-      );
-    }
-
-  }
-);
-
-
-/* -----------------------------
-   MODAL EVENTS
------------------------------ */
-
-$("modalClose").onclick =
-  closeModal;
-
-
-$("modal").addEventListener(
-  "click",
-  event => {
-
-    if(
-      event.target ===
-      $("modal")
-    ){
-
-      closeModal();
-
-    }
-
-  }
-);
-
-
-/* -----------------------------
-   RESPONSIVE 3D
------------------------------ */
-
-window.addEventListener(
-  "resize",
-  () => {
-
-    if(!renderer)
-      return;
-
-
-    camera.aspect =
-      innerWidth /
-      innerHeight;
-
-
-    camera.updateProjectionMatrix();
-
-
-    renderer.setSize(
-      innerWidth,
-      innerHeight - 64
-    );
-
-  }
-);
-
-
-/* -----------------------------
-   KEYBOARD
------------------------------ */
-
-window.addEventListener(
-  "keydown",
-  event => {
-
-    const map = {
-
-      1:"defend",
-      2:"drive",
-      3:"cut",
-      4:"pull",
-      5:"loft"
-
-    };
-
-
-    if(map[event.key]){
-
-      handleShot(
-        map[event.key]
-      );
-
-    }
-
-  }
-);
-
-
-/* -----------------------------
-   LOADING
------------------------------ */
-
-for(
-  let i=0;
-  i<=100;
-  i+=10
-){
-
-  setTimeout(
-    () => {
-
-      $("loadProgress")
-        .style.width =
-        i + "%";
-
-    },
-    i * 4
-  );
-}
-
-
-setTimeout(
-  () => {
-
-    $("loading").style.opacity =
-      0;
-
-
-    setTimeout(
-      () => {
-
-        $("loading").remove();
-
-      },
-      500
-    );
-
-
-    renderAll();
-
-  },
-  550
-);
+document.addEventListener("click",e=>{
+  const action=e.target.closest("[data-action]")?.dataset.action;
+  if(action==="home")show("home");else if(action==="profile")show("profile");else if(action==="match")show("match");else if(action==="training")show("training");else if(action==="stats")show("stats");else if(action==="contract")show("contract");else if(action==="news")show("news");else if(action==="create")openCreate();
+  const train=e.target.closest("[data-train]")?.dataset.train;
+  if(train){const r=career.train(train);comment("");renderAll();alert(r.msg)}
+  const shot=e.target.closest("[data-shot]")?.dataset.shot;if(shot)battingShot(shot);
+  const bowl=e.target.closest("[data-bowl]")?.dataset.bowl;if(bowl)bowling(bowl);
+});
+$("modalClose").onclick=()=>$("modal").classList.remove("show");
+window.addEventListener("resize",resize3D);
+window.addEventListener("beforeunload",stop3D);
+let progress=0;const timer=setInterval(()=>{progress+=12;$("loadProgress").style.width=Math.min(progress,100)+"%";if(progress>=100){clearInterval(timer);setTimeout(()=>$("loading").classList.add("hide"),180)}},80);
+renderAll();
