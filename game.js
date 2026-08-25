@@ -1,4 +1,4 @@
-const BOOT_TIMEOUT=9000;
+const BOOT_TIMEOUT=15000;
 const loading=document.getElementById("loading");
 const progress=document.getElementById("loadProgress");
 const message=document.querySelector("#loading p");
