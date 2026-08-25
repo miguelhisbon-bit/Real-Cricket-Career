@@ -2,99 +2,112 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#061018">
-<title>Real Cricket Career — V6</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#04101a">
+<title>Real Cricket Career — V9</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="loading">
-  <div class="loader-ball">🏏</div>
-  <h1>REAL CRICKET <span>CAREER</span></h1>
-  <p>Building stadium • career systems • elite 3D match engine</p>
-  <div class="loadbar"><i id="loadProgress"></i></div>
-</div>
+<div id="app">
 <header class="topbar">
-  <div class="brand">🏏 REAL CRICKET <span>CAREER</span></div>
-  <div id="topStats">Age 18 • OVR 55 • ₹ 500</div>
+  <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
+  <div class="brand"><span>🏏</span> REAL CRICKET <b>CAREER</b></div>
+  <div class="wallet"><span>🪙 <b id="coins">125.6K</b></span><span>💎 <b id="gems">860</b></span></div>
 </header>
-<main id="app">
-<section id="home" class="screen active">
-  <div class="hero heroV5">
-    <div class="heroGlow"></div>
-    <div class="heroCopy">
-      <div class="seasonBadge">PLAYER CAREER <i></i> SEASON 1</div>
-      <h2 id="homeName">Create your player</h2>
-      <p id="homeStatus">Start from academy cricket and build your legend.</p>
-      <div class="heroMeta"><span>🏟️ 3D Match Engine</span><span>👥 11 vs 11</span><span>🎥 Dynamic Camera</span></div>
+
+<main id="home" class="screen active">
+  <section class="hero-card">
+    <div class="player-avatar" aria-hidden="true"><div class="avatar-glow"></div><div class="avatar-head"></div><div class="avatar-body"><em>7</em></div></div>
+    <div class="hero-copy">
+      <div class="eyebrow">PLAYER CAREER · SEASON 1</div>
+      <h1 id="playerName">SAIKAT</h1>
+      <p>Age 18 · Right Hand Bat · Right Arm Offbreak</p>
+      <div class="xp-row"><div class="progress"><i id="xpBar"></i></div><small><span id="xpText">560</span> / 1200 XP</small></div>
+      <div class="badges"><span>ACADEMY XI</span><span id="formBadge">FORM 68</span><span>LEVEL 1</span></div>
     </div>
-    <div class="ovrWrap"><span>OVR</span><div class="ovr" id="homeOvr">55</div><small>FORM <b id="homeForm">60</b></small></div>
-  </div>
-  <div class="quickStats" id="quickStats"></div>
-  <div class="sectionLabel"><span>CAREER HUB</span><i></i></div>
-  <div class="grid">
-    <button class="menuCard" data-action="profile"><span class="menuIcon">👤</span><b>Player</b><small>Profile & skills</small><em>VIEW</em></button>
-    <button class="menuCard featured" data-action="match"><span class="menuIcon">🏟️</span><b>Play Match</b><small>Full 3D T20 • 11 players</small><em>PLAY NOW</em></button>
-    <button class="menuCard" data-action="training"><span class="menuIcon">⚡</span><b>Training</b><small>Improve your skills</small></button>
-    <button class="menuCard" data-action="stats"><span class="menuIcon">📊</span><b>Career Stats</b><small>Records & form</small></button>
-    <button class="menuCard" data-action="contract"><span class="menuIcon">💰</span><b>Contract</b><small>Career offers</small></button>
-    <button class="menuCard" data-action="news"><span class="menuIcon">📰</span><b>News</b><small>Career events</small></button>
-    <button class="menuCard" data-action="selection"><span class="menuIcon">🎟️</span><b>Selection</b><small>Selectors & squad status</small></button>
-    <button class="menuCard" data-action="awards"><span class="menuIcon">🏆</span><b>Awards</b><small>Trophies & milestones</small></button>
-  </div>
-  <div class="panel journeyPanel">
-    <div class="panelTitle"><h3>Career Journey</h3><span id="journeyStage">ACADEMY</span></div>
-    <div id="journey"></div>
-  </div>
-  <div class="v6Dashboard">
-    <div class="panel seasonPanel">
-      <div class="panelTitle"><h3>Season Dashboard</h3><span id="seasonLabel">SEASON 1</span></div>
-      <div class="goalGrid" id="seasonGoals"></div>
-      <div class="goalProgress"><span id="goalText">0 / 250 runs</span><i id="goalBar"></i></div>
-    </div>
-    <div class="panel reputationPanel">
-      <div class="panelTitle"><h3>Career Reputation</h3><span id="selectionStatus">ACADEMY WATCH</span></div>
-      <div class="repGrid" id="reputationGrid"></div>
-    </div>
-    <div class="panel conditionPanel">
-      <div class="panelTitle"><h3>Pro Fitness</h3><span id="injuryStatus">FIT</span></div>
-      <div class="conditionRow"><div><small>Condition</small><b id="conditionValue">92</b></div><div><small>Fatigue</small><b id="fatigueValue">0</b></div><div><small>Fans</small><b id="fansValue">35</b></div></div>
-      <div class="meter triple"><i id="conditionBar"></i></div>
-      <button class="secondaryBtn" id="recoverBtn">🧘 Recovery Day</button>
-    </div>
-  </div>
-</section>
-<section id="profile" class="screen">
-  <div class="sectionHead"><button data-action="home">←</button><h2>Player Profile</h2></div>
-  <div class="profileCard"><div class="avatar" id="avatar">🏏</div><div class="profileMain"><h2 id="profileName">Rookie</h2><p id="profileRole">Right Hand Batter</p><strong id="profileTeam">Academy XI</strong><div class="pillRow"><span id="profileAge">18 yrs</span><span id="profileLevel">Level 1</span><span id="profileForm">Form 60</span></div></div></div>
-  <div class="skillGrid" id="skills"></div>
-  <button class="primary" data-action="create">✏️ Create / Reset Player</button>
-</section>
-<section id="training" class="screen"><div class="sectionHead"><button data-action="home">←</button><h2>Training</h2></div><p class="muted">Training costs energy. Recover after matches.</p><div class="trainingGrid"><button data-train="batting">🏏<b>Batting</b><small>Timing + technique</small></button><button data-train="power">💥<b>Power</b><small>Boundary hitting</small></button><button data-train="bowling">🎯<b>Bowling</b><small>Accuracy + control</small></button><button data-train="fielding">🧤<b>Fielding</b><small>Catches + throws</small></button><button data-train="fitness">🏃<b>Fitness</b><small>Stamina + recovery</small></button><button data-train="mental">🧠<b>Mental</b><small>Composure</small></button></div><div class="panel energyPanel"><div class="panelTitle"><b>Energy</b><span id="energyText">100 / 100</span></div><div class="meter"><i id="energyBar"></i></div></div></section>
-<section id="stats" class="screen"><div class="sectionHead"><button data-action="home">←</button><h2>Career Stats</h2></div><div class="statCards" id="careerStats"></div><div class="panel"><h3>Recent Matches</h3><div id="recent"></div></div></section>
-<section id="contract" class="screen"><div class="sectionHead"><button data-action="home">←</button><h2>Contract</h2></div><div class="panel" id="contractPanel"></div></section>
-<section id="news" class="screen"><div class="sectionHead"><button data-action="home">←</button><h2>Career News</h2></div><div id="newsList"></div></section>
-<section id="selection" class="screen"><div class="sectionHead"><button data-action="home">←</button><h2>Selection Hub</h2></div><div class="panel selectionHero"><span class="eyebrow">SELECTOR ROOM</span><h2 id="selectionTitle">Academy XI</h2><p id="selectionCopy" class="muted"></p><div id="selectionBars"></div></div><div class="panel"><h3>Selection checklist</h3><div id="selectionChecklist"></div></div></section>
-<section id="awards" class="screen"><div class="sectionHead"><button data-action="home">←</button><h2>Awards Cabinet</h2></div><div class="awardHero"><span>🏆</span><div><b id="awardCount">0</b><small>career awards</small></div></div><div id="awardsList"></div></section>
-<section id="match" class="screen gameScreen">
-  <canvas id="gameCanvas"></canvas><div class="stadiumVignette"></div><div class="stadiumTopGlow"></div>
-  <div class="matchTop">
-    <div class="scoreCard"><div class="teamLine"><b id="batTeam">ACADEMY XI</b><span id="inningsLabel">1ST INNINGS</span></div><div class="scoreLine"><strong id="score">0/0</strong><span id="overs">0.0 ov</span></div><div class="targetLine"><span id="target">YOU BAT FIRST • T20</span><span id="runRate">RR 0.00</span></div></div>
-    <div class="matchBadge"><span id="matchClock">00:00</span><b id="matchPhase">BATTING</b><small id="venueLabel">NIGHT • HOME</small></div>
-  </div>
-  <div class="matchInfo"><div class="playerTag activeTag"><span class="dot green"></span><b id="strikerName">PLAYER</b><small id="strikerMini">0* (0)</small></div><div class="playerTag"><span class="dot gold"></span><b id="aiName">TEAMMATE</b><small id="aiMini">NON-STRIKER</small></div><div class="playerTag"><span class="dot red"></span><b id="bowlerName">AI BOWLER</b><small id="bowlerMini">PACE</small></div></div>
-  <div class="liveFieldHUD"><span id="strikeStatus">⚡ YOU ARE ON STRIKE</span><span id="deliveryText">READY</span><span id="fieldText">FIELD: BALANCED</span><span id="stadiumStatus">FULL STADIUM</span></div>
-  <div class="commentary" id="commentary">Choose a batting shot.</div><div class="shotFeedback" id="shotFeedback">TIMING • READY</div><div class="aiDecision" id="aiDecision">AI reading the situation…</div><div class="ballIndicator" id="ballIndicator"><span></span></div>
-  <div class="shotPanel" id="shotPanel"><div class="controlTitle">BAT — read the ball and choose your shot</div><div class="controls"><button data-shot="defend"><span>🛡️</span><b>DEFEND</b><small>Safe</small></button><button data-shot="drive"><span>🏏</span><b>DRIVE</b><small>Timing</small></button><button data-shot="cut"><span>↗️</span><b>CUT</b><small>Short</small></button><button data-shot="pull"><span>💥</span><b>PULL</b><small>Body</small></button><button data-shot="loft"><span>🚀</span><b>LOFT</b><small>Risk</small></button></div></div>
-  <div class="bowlPanel" id="bowlPanel"><div class="controlTitle">BOWL — control the AI chase</div><div class="bowlControls"><button data-bowl="yorker"><span>🎯</span><b>YORKER</b><small>Stumps</small></button><button data-bowl="length"><span>⚡</span><b>LENGTH</b><small>Control</small></button><button data-bowl="bouncer"><span>⬆️</span><b>BOUNCER</b><small>Pressure</small></button><button data-bowl="slower"><span>🌀</span><b>SLOWER</b><small>Variation</small></button></div></div>
-  <div class="matchBottom"><div class="miniScore" id="miniScore">Player 0* • 0 balls</div><div class="bottomActions"><button class="glassBtn" id="cameraBtn">🎥 VIEW</button><button class="glassBtn" id="wideBtn">🏟️ WIDE</button><button class="exitGame" data-action="home">×</button></div></div>
-  <div class="cameraHint" id="cameraHint">CAMERA • BROADCAST WIDE</div>
-  <div class="teamPanel" id="teamPanel"><div class="teamPanelHead"><b>🏏 11 PLAYERS</b><span id="teamCount">11/11</span></div><div id="teamPlayers"></div></div>
-  <div id="matchResult" class="resultOverlay"><div class="resultCard"><div class="resultIcon" id="resultIcon">🏆</div><div class="resultKicker">FULL TIME • SCORECARD</div><h2 id="resultTitle">Match Complete</h2><p id="resultText"></p><div class="resultStats" id="resultStats"></div><div class="resultButtons"><button class="secondaryBtn" data-action="home">Continue Career</button><button class="primary" id="newMatchBtn">🏏 New Match</button></div></div></div>
-</section>
+    <div class="ovr"><small>OVR</small><strong id="ovr">56</strong><i>★</i></div>
+  </section>
+
+  <section class="stats-grid">
+    <div><small>MATCHES</small><strong id="matches">1</strong></div>
+    <div><small>RUNS</small><strong id="runs">78</strong></div>
+    <div><small>BEST</small><strong id="best">78</strong></div>
+    <div><small>STRIKE RATE</small><strong id="sr">162.5</strong></div>
+  </section>
+
+  <section class="menu-grid">
+    <button class="tile primary" id="playBtn"><span>🏟️</span><b>PLAY MATCH</b><small>Live T20 · 11 players</small><i>PLAY →</i></button>
+    <button class="tile" id="careerBtn"><span>🛡️</span><b>CAREER JOURNEY</b><small>Academy → International</small></button>
+    <button class="tile" id="trainingBtn"><span>⚡</span><b>TRAINING</b><small>Bat · Bowl · Field · Fitness</small></button>
+    <button class="tile" id="statsBtn"><span>📊</span><b>STATS & RECORDS</b><small>Career numbers</small></button>
+    <button class="tile" id="equipmentBtn"><span>🏏</span><b>EQUIPMENT</b><small>Bat · pads · gloves</small></button>
+    <button class="tile" id="newsBtn"><span>📰</span><b>NEWS</b><small>Career events</small></button>
+  </section>
+
+  <section class="journey">
+    <div class="section-head"><h2>CAREER JOURNEY</h2><span>SEASON 1</span></div>
+    <div class="road"><div class="node current">ACADEMY</div><i></i><div class="node locked">DOMESTIC</div><i></i><div class="node locked">FRANCHISE</div><i></i><div class="node locked">INTERNATIONAL</div></div>
+  </section>
 </main>
-<div id="modal" class="modal"><div class="modalBox"><button id="modalClose" class="modalClose">×</button><div id="modalContent"></div></div></div>
-<nav class="mobileNav" id="mobileNav"><button data-action="home">⌂<small>Home</small></button><button data-action="profile">👤<small>Player</small></button><button class="navPlay" data-action="match">🏏<small>Play</small></button><button data-action="stats">📊<small>Stats</small></button><button data-action="training">⚡<small>Train</small></button></nav>
-<script type="module" src="game.js"></script>
+
+<main id="match" class="screen match-screen">
+  <div class="match-top">
+    <div class="score-card"><div><span id="inningsLabel">1ST INNINGS</span><b><strong id="score">18</strong>/<strong id="wickets">1</strong></b><small><span id="overs">2.3</span> OV · RR <span id="rr">7.20</span></small></div><div class="target"><small>TARGET</small><b id="target">142</b><em id="needText">124 needed</em></div></div>
+    <div class="live-pill"><i></i><b id="modeLabel">BATTING</b><small id="ballClock">LIVE</small></div>
+  </div>
+
+  <section class="players-strip">
+    <div class="bat-card"><i class="dot green"></i><b id="striker">Saikat</b><strong id="strikerRuns">9* (6)</strong><small>STRIKER</small></div>
+    <div class="bat-card active"><i class="dot gold"></i><b id="partner">Rahul Sen</b><strong id="partnerRuns">9* (5)</strong><small>NON-STRIKER</small></div>
+    <div class="bat-card"><i class="dot red"></i><b id="bowlerName">Samar Khan</b><strong id="bowlerSpell">0/12</strong><small id="bowlerMeta">FAST · 91 KPH</small></div>
+  </section>
+
+  <section class="stadium-wrap" id="stadiumWrap">
+    <canvas id="stadium" width="1000" height="1200"></canvas>
+    <div class="broadcast"><span>📺</span> BROADCAST <b id="cameraMode">WIDE</b></div>
+    <div class="score-chip" id="statusChip">FIELD SET · SAMAR 91 KPH</div>
+    <div class="ball-tracker" id="ballTracker">●</div>
+    <div class="result-pop" id="resultPop"></div>
+    <div class="speed-pop" id="speedPop"></div>
+    <div class="camera-flash" id="cameraFlash"></div>
+  </section>
+
+  <section class="match-hud">
+    <div class="hud-main"><b id="hudTitle">YOUR BATTING</b><span id="hudSub">Choose timing and shot placement.</span></div>
+    <div class="mini-score"><b id="miniOver">OVER 3 · BALL 4</b><small id="fieldState">FIELD · BALANCED</small></div>
+  </section>
+  <div class="ball-history" id="ballHistory"></div>
+
+  <section class="control-deck" id="batControls">
+    <div class="deck-title"><span>BAT NOW</span><small>Timing matters · defend is safest</small></div>
+    <div class="shot-controls">
+      <button data-shot="defend"><span>🛡️</span><b>DEFEND</b><small>SAFE</small></button>
+      <button data-shot="drive"><span>🏏</span><b>DRIVE</b><small>TIMED</small></button>
+      <button data-shot="cut"><span>↗️</span><b>CUT</b><small>SQUARE</small></button>
+      <button data-shot="pull"><span>💥</span><b>PULL</b><small>POWER</small></button>
+      <button data-shot="loft"><span>🚀</span><b>LOFT</b><small>RISK</small></button>
+    </div>
+  </section>
+  <section class="control-deck hidden" id="bowlControls">
+    <div class="deck-title"><span>BOWL NOW</span><small>Pick a delivery to challenge the AI batter.</small></div>
+    <div class="shot-controls bowl-controls">
+      <button data-bowl="yorker"><span>🎯</span><b>YORKER</b><small>FULL</small></button>
+      <button data-bowl="good"><span>🟢</span><b>GOOD</b><small>LENGTH</small></button>
+      <button data-bowl="bouncer"><span>↗️</span><b>BOUNCER</b><small>SHORT</small></button>
+      <button data-bowl="slower"><span>🐢</span><b>SLOWER</b><small>CHANGE</small></button>
+      <button data-bowl="spin"><span>🌀</span><b>OFFSPIN</b><small>TURN</small></button>
+    </div>
+  </section>
+
+  <div class="match-actions"><button id="cameraBtn">🎥 CAMERA</button><button id="pauseBtn">Ⅱ</button><button id="endMatchBtn">✕</button></div>
+</main>
+
+<main id="career" class="screen sub-screen"><button class="back" data-home>← HOME</button><h2>Career Journey</h2><div class="career-card"><b>ACADEMY</b><span class="done">CURRENT · OVR 56</span><p>Build form, earn XP and win selection.</p></div><div class="career-card"><b>DOMESTIC LEAGUE</b><span>LOCKED · OVR 65</span><p>Earn your first professional contract.</p></div><div class="career-card"><b>FRANCHISE CRICKET</b><span>LOCKED · OVR 75</span><p>Become a T20 star and grow your fanbase.</p></div><div class="career-card"><b>INTERNATIONAL</b><span>LOCKED · OVR 82</span><p>Represent your country on the world stage.</p></div></main>
+<main id="statsScreen" class="screen sub-screen"><button class="back" data-home>← HOME</button><h2>Stats & Records</h2><div class="record-grid"><div>Runs <b id="statRuns">78</b></div><div>Matches <b id="statMatches">1</b></div><div>Best <b id="statBest">78</b></div><div>4s <b id="fours">8</b></div><div>6s <b id="sixes">3</b></div><div>Form <b id="form">68</b></div></div></main>
+<main id="trainingScreen" class="screen sub-screen"><button class="back" data-home>← HOME</button><h2>Training Hub</h2><div class="training-grid"><button data-train="bat">🏏<b>Batting Nets</b><small>Timing + power</small></button><button data-train="bowl">🎯<b>Bowling</b><small>Control + variation</small></button><button data-train="field">🧤<b>Fielding</b><small>Reflex + throwing</small></button><button data-train="fit">⚡<b>Fitness</b><small>Stamina + recovery</small></button></div></main>
+
+<nav class="bottom-nav"><button class="active" data-screen="home">⌂<small>Home</small></button><button data-screen="career">♟<small>Career</small></button><button id="navPlay">🏏<small>Play</small></button><button data-screen="statsScreen">▥<small>Stats</small></button><button id="navTrain">⚡<small>Train</small></button></nav>
+</div>
+<script src="data.js"></script><script src="game.js"></script>
 </body>
 </html>
