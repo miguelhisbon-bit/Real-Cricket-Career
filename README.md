@@ -1,20 +1,46 @@
-# Real Cricket Career — V2
+# Real Cricket Career V8 — Elite Edition
 
-A mobile-first cricket player-career browser game.
+## 🏏 Complete 3D Cricket Career Game
 
-## Included
-- Player creation/reset with local save
-- Dynamic career dashboard
-- Training and skill progression
-- T20 match engine
-- Batting shot selection
-- Bowling delivery selection
-- 3D stadium using Three.js CDN
-- Match result + career stats
-- Contracts, news and career journey
-- Responsive touch UI
+### Features Added in V8:
+- ✅ All bugs fixed (match finish, null references, camera leak)
+- ✅ Glass-morphism UI
+- ✅ Particle effects (boundaries, wickets, sixes)
+- ✅ Momentum system with visual meter
+- ✅ Weather system (4 conditions affecting gameplay)
+- ✅ Player personality system
+- ✅ Color-coded commentary
+- ✅ Form history graph
+- ✅ Training timing mini-game
+- ✅ Animated LED boundary rope
+- ✅ Animated crowd
 
-## Play
-Open `index.html` in a browser or publish the repository with GitHub Pages.
+### How to Play:
+1. Open `index.html` in a modern browser
+2. Create your player (name, role, personality)
+3. Play matches, train skills, earn contracts
+4. Build your career from Academy to International
 
-No build step is required.
+### Controls:
+- **Batting**: Click shot buttons (DEFEND, DRIVE, CUT, PULL, LOFT)
+- **Bowling**: Click bowl types (YORKER, LENGTH, BOUNCER, SLOWER)
+- **Camera**: Use VIEW and WIDE buttons
+- **Training**: Click timing challenge when marker is in green zone
+
+### Career Features:
+- 11 vs 11 3D matches
+- Full T20 gameplay
+- Skill development
+- Reputation system
+- Contract offers
+- Season targets
+- Awards & milestones
+
+### Tech Stack:
+- Three.js (3D rendering)
+- Vanilla JS
+- LocalStorage (career save)
+- CSS Glass-morphism
+- Web Audio Ready
+
+### Files:
