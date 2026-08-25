@@ -1,12 +1,21 @@
-REAL CRICKET CAREER V7 — FULL iPHONE COPY
+REAL CRICKET CAREER — V7.1
 
-V7 includes: career progression, season goals, selection hub, contracts, reputation, fitness/fatigue/injury, awards, dynamic news, training/recovery, persistent career save, plus upgraded procedural Three.js player models, kit details, stadium presentation, lighting, camera modes, field, umpires, playable T20 match logic, accurate batting average/dismissal tracking, correct bowling wicket stats, season goal completion, and smarter AI strike rotation.
+Based on the working V6 gameplay base.
 
-COPY FILES
-1. CODE_TO_COPY_HTML.txt -> index.html
-2. CODE_TO_COPY_CSS.txt -> style.css
-3. CODE_TO_COPY_GAME_JS.txt -> game.js
-4. CODE_TO_COPY_DATA_JS.txt -> data.js
-5. career.js -> career.js
+V7.1 changes:
+- Restored/strengthened Play Match startup so the match state and HUD appear even if WebGL initialization fails.
+- Preserved the V6 3D stadium, batting, bowling, AI and career systems.
+- Home screen simplified: OVR/star rating is no longer shown on Home.
+- Player Profile now shows the star rating and OVR.
+- Improved career statistics average using dismissals/not-out status.
+- Season objective completion now requires matches + runs + wins.
+- Existing localStorage saves are migrated safely with new fields.
 
-No build step is required. GitHub Pages can serve the project as static files. The 3D engine loads Three.js from jsDelivr at runtime.
+Files to replace in GitHub:
+1. index.html
+2. style.css
+3. game.js
+4. career.js
+5. data.js
+
+If using GitHub Pages, wait for the deployment to finish and hard-refresh the site after replacing the files.

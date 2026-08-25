@@ -18,15 +18,15 @@ function show(id){
 }
 function renderAll(){
   const p=career.player;
-  $("topStats").textContent=`Age ${p.age} • OVR ${p.overall} • ₹ ${fmt(p.money)}`;
-  $("homeName").textContent=p.name;$("homeOvr").textContent=p.overall;$("homeForm").textContent=Math.round(p.form);
+$("topStats").textContent=`SEASON ${p.season.number} • ${p.team} • ₹ ${fmt(p.money)}`;
+  $("homeName").textContent=p.name;$("homeForm").textContent=Math.round(p.form);
   $("homeStatus").textContent=`${p.team} • Level ${p.level} • Form ${Math.round(p.form)} • ${p.contract}`;
   $("profileName").textContent=p.name;$("profileRole").textContent=p.role;$("profileTeam").textContent=p.team;
-  $("profileAge").textContent=`${p.age} yrs`;$("profileLevel").textContent=`Level ${p.level}`;$("profileForm").textContent=`Form ${Math.round(p.form)}`;
+  $("profileAge").textContent=`${p.age} yrs`;$("profileLevel").textContent=`Level ${p.level}`;$("profileForm").textContent=`Form ${Math.round(p.form)}`;  const starCount=Math.max(1,Math.min(5,Math.round(p.overall/20)));$("profileStars").textContent="★".repeat(starCount)+"☆".repeat(5-starCount);$("profileRatingText").textContent=`${p.overall} OVR`;
   $("avatar").textContent=p.role.toLowerCase().includes("bowl")?"🎯":"🏏";
   $("skills").innerHTML=Object.entries(p.skills).map(([k,v])=>`<div class="skill"><div class="skillTop"><b>${k[0].toUpperCase()+k.slice(1)}</b><strong>${v}</strong></div><div class="meter"><i style="width:${v}%"></i></div></div>`).join("");
   $("energyBar").style.width=p.energy+"%";$("energyText").textContent=`${Math.round(p.energy)} / 100`;
-  const st={Matches:p.stats.matches,Runs:p.stats.runs,"High score":p.stats.highScore,Wickets:p.stats.wickets,Wins:p.stats.wins,"50s":p.stats.fifties,"100s":p.stats.hundreds,Catches:p.stats.catches,Average:p.stats.average};
+  const st={Matches:p.stats.matches,Runs:p.stats.runs,"High score":p.stats.highScore,Wickets:p.stats.wickets,Wins:p.stats.wins,"50s":p.stats.fifties,"100s":p.stats.hundreds,Catches:p.stats.catches};
   $("careerStats").innerHTML=Object.entries(st).map(([k,v])=>`<div class="statCard"><small>${k}</small><strong>${fmt(v)}</strong></div>`).join("");
   $("recent").innerHTML=p.recent.length?p.recent.map(r=>`<div class="row"><span>${r.opponent}<br><small>${r.runs} (${r.balls}) • ${r.wickets} wkts</small></span><b>${r.win?"WIN":"LOSS"}</b></div>`).join(""):"<p class='muted'>No matches played yet.</p>";
   $("quickStats").innerHTML=[["Runs",p.stats.runs],["Matches",p.stats.matches],["Best",p.stats.highScore],["Form",Math.round(p.form)]].map(x=>`<div class="quickStat"><small>${x[0]}</small><b>${fmt(x[1])}</b></div>`).join("");
@@ -154,6 +154,7 @@ function updateAnimation(dt){
   if(q>=1){anim.active=false;anim.done?.()}
 }
 function launchBall(runs,wicket,shotType="drive",fromBatting=false){
+  if(!scene){return;}
   if(three.ball)scene.remove(three.ball);const ball=new THREE.Mesh(new THREE.SphereGeometry(.095,18,14),mat(0xa91528,.35));const playerBatting=game?.phase==="bat";const strikerZ=playerBatting?-8.6:8.6;const startZ=playerBatting?8.5:-8.5;ball.position.set(0,1.18,startZ);scene.add(ball);three.ball=ball;
   let side=(Math.random()-.5)*1.3;if(shotType==="cut")side=-1.4+Math.random()*2.8;if(shotType==="pull")side=(Math.random()<.5?-1:1)*(1.2+Math.random()*2);if(shotType==="loft")side=(Math.random()-.5)*4;
   const dir=playerBatting?-1:1,base=10+(runs>=4?4:0)+(runs>=6?6:0),target=new THREE.Vector3(side,Math.min(1.4,0.18+(runs>=6?.5:0)),strikerZ+dir*base);const start=ball.position.clone(),t0=performance.now(),dur=wicket?620:(runs>=4?1000:800);
@@ -163,10 +164,18 @@ function launchBall(runs,wicket,shotType="drive",fromBatting=false){
 /* --------------------------- MATCH LOGIC --------------------------- */
 function overString(balls){return `${Math.floor(balls/6)}.${balls%6}`}function rr(runs,balls){return balls?((runs/(balls/6))).toFixed(2):"0.00"}
 function startMatch(){
-  if(renderer===undefined||!renderer)init3D();
   const opponent=TEAMS[1+Math.floor(Math.random()*3)],bowl=AI_BOWLERS[Math.floor(Math.random()*AI_BOWLERS.length)];
   game={innings:1,phase:"bat",balls:0,runs:0,wickets:0,playerRuns:0,playerBalls:0,teammateRuns:0,teammateBalls:0,fours:0,sixes:0,bowlWickets:0,catches:0,target:null,opponent,teammateName:"Rahul Sen",userStriker:true,playerOut:false,overNumber:0,ballInOver:0,finished:false,aiScore:0,aiWickets:0,aiBalls:0,aiBatterIndex:0,aiOnStrike:true,aiBatter:AI_BATTERS[0],aiNon:AI_BATTERS[1],aiBowler:bowl,teamBatters:[career.player.name,"Rahul Sen","Aman Roy","Rafi Khan","Nabil Hasan","Sohan Das","Imran Ali","Rifat Chowdhury","Arif Noor","Tanim Ahmed","Shuvo Paul"],matchStart:Date.now()};
-  lastMatchStart=Date.now();$("matchResult").classList.remove("show");buildTeams();cameraMode=0;cinematicCamera(0);setPhaseText(`Toss won • ${career.player.name}'s XI bats first. Watch the line and choose your shot.`);$("aiDecision").textContent=`${game.aiBowler.name} is setting the field • ${game.aiBowler.pace} kph pace`;updateMatchUI();renderTeamList();
+  lastMatchStart=Date.now();$("matchResult").classList.remove("show");
+  if(renderer===undefined||!renderer){
+    try{ init3D(); }catch(err){
+      console.warn("3D engine unavailable; continuing with gameplay HUD.",err);
+      renderer=null; scene=null; camera=null; clock=null;
+      document.body.classList.add("no3d");
+    }
+  }
+  if(renderer) buildTeams();
+  cameraMode=0;if(camera)cinematicCamera(0);setPhaseText(`Toss won • ${career.player.name}'s XI bats first. Watch the line and choose your shot.`);$("aiDecision").textContent=`${game.aiBowler.name} is setting the field • ${game.aiBowler.pace} kph pace`;updateMatchUI();renderTeamList();
 }
 function updateMatchUI(){
   if(!game)return;const isBat=game.phase==="bat",userOn=isBat&&game.userStriker&&!game.playerOut;
@@ -180,15 +189,8 @@ function updateMatchUI(){
 function setPhaseText(text){$("commentary").textContent=text}function animateIndicator(wicket=false){const el=$("ballIndicator");el.classList.remove("animate","wicket");void el.offsetWidth;el.classList.add("animate");if(wicket)el.classList.add("wicket")}
 function timingQuality(){const p=career.player;return Math.min(99,p.skills.batting*.46+p.skills.mental*.16+p.skills.fitness*.08+p.form*.30)}
 function completePlayerBall(){
-  if(!game||game.finished)return;
-  if(game.ballInOver>=6){
-    game.ballInOver=0;game.overNumber++;game.userStriker=!game.userStriker;
-    setPhaseText(`OVER ${game.overNumber} COMPLETE • End-of-over strike rotation applied. ${game.userStriker&&!game.playerOut?"You face the new over.":"Teammate faces the new over."}`);
-  }
-  updateMatchUI();renderTeamList();
-  if(game.wickets>=10||game.balls>=120){beginAIMatch();return}
-  if(game.phase==="bat"&&!game.playerOut&&!game.userStriker)setTimeout(()=>{if(game&&!game.finished&&game.phase==="bat"&&!anim.active)teammateBall()},650);
-  else if(game.phase==="bat"&&game.playerOut)setTimeout(()=>{if(game&&!game.finished&&game.phase==="bat"&&!anim.active)teammateBall()},650);
+  if(game.ballInOver>=6){game.ballInOver=0;game.overNumber++;game.userStriker=!game.userStriker;setPhaseText(`OVER ${game.overNumber} COMPLETE • End-of-over strike rotation applied. ${game.userStriker&&!game.playerOut?"You face the new over.":"Teammate faces the new over."}`)}
+  updateMatchUI();renderTeamList();if(game.wickets>=10||game.balls>=120){beginAIMatch();return}if(game.phase==="bat"&&!game.playerOut&&!game.userStriker)setTimeout(()=>{if(game&&!game.finished&&game.phase==="bat")teammateBall()},650);else if(game.phase==="bat"&&game.playerOut)setTimeout(()=>{if(game&&!game.finished&&game.phase==="bat")teammateBall()},650);
 }
 function battingShot(type){
   if(!game||game.phase!=="bat"||game.playerOut||!game.userStriker||anim.active)return;three.batter=three.players[0]||three.batter;const p=career.player,s=SHOTS[type];game.playerBalls++;game.balls++;game.ballInOver++;
@@ -211,31 +213,18 @@ function beginAIMatch(){
   const pos=[[-9,0,2],[9,0,2],[-6.5,0,-6.8],[6.5,0,-6.8],[-12,0,-4],[12,0,-4],[-14.5,0,7.5],[14.5,0,7.5],[0,0,-8.5]];three.fielders.forEach((f,i)=>{f.position.set(...pos[i]);f.rotation.y=Math.atan2(-pos[i][0],-pos[i][2])});
   setPhaseText(`TARGET ${game.target} • You are bowling. Use variation and attack the AI batter's weakness.`);$("aiDecision").textContent="AI is reading required run rate, wickets in hand and field placement…";cinematicCamera(0);updateMatchUI();renderTeamList();
 }
-function swapAIStrike(){
-  if(!game)return;
-  const tmp=game.aiBatter;game.aiBatter=game.aiNon;game.aiNon=tmp;game.aiOnStrike=!game.aiOnStrike;
-}
-
 function chooseAIShot(){const b=game.aiBatter,need=Math.max(0,game.target-game.aiScore),left=Math.max(1,120-game.aiBalls),required=need/(left/6),base=b.bat*.48+b.power*.22+b.mental*.18+b.form*.12;let shot;if(required>12)shot=Math.random()<.62?"loft":Math.random()<.7?"pull":"drive";else if(required>9)shot=Math.random()<.45?"loft":Math.random()<.6?"pull":"drive";else if(required>7)shot=Math.random()<.3?"loft":Math.random()<.5?"drive":"cut";else if(required<5)shot=Math.random()<.52?"defend":Math.random()<.7?"drive":"cut";else shot=Math.random()<.38?"drive":Math.random()<.68?"cut":"pull";if(game.aiWickets>=6&&b.mental>70&&required<8)shot="drive";if(base<52&&required>10&&Math.random()<.35)shot="defend";return shot}
 function bowling(type){
   if(!game||game.phase!=="bowl"||anim.active||game.aiBalls>=120)return;game.aiBalls++;const b=game.aiBatter,d=BOWLS[type],need=Math.max(0,game.target-game.aiScore),left=Math.max(1,120-game.aiBalls),required=need/(left/6),bowStrength=(career.player.skills.bowling*.44+career.player.skills.mental*.2+career.player.skills.fitness*.18+career.player.skills.fielding*.18)/100,aiShot=chooseAIShot();let wicketChance=d.wicket*(.72+bowStrength*.72);if(type==="yorker"&&b.bat<65)wicketChance+=.03;if(type==="bouncer"&&b.power>72)wicketChance-=.018;if(required>10)wicketChance+=.012;const wicket=Math.random()<Math.min(.32,wicketChance);const r=Math.random();let runs;if(wicket)runs=0;else if(type==="yorker")runs=r<.55?0:r<.81?1:r<.94?2:r<.985?4:6;else if(type==="length")runs=r<.4?0:r<.7?1:r<.88?2:r<.98?4:6;else if(type==="bouncer")runs=r<.28?0:r<.54?1:r<.72?2:r<.94?4:6;else runs=r<.46?0:r<.70?1:r<.87?2:r<.97?4:6;
   animateBowling(()=>launchBall(runs,wicket,aiShot,false));animateIndicator(wicket);
-  if(wicket){game.aiWickets++;game.bowlWickets++;setPhaseText(`${d.desc} • OUT! ${b.name} is beaten by your ${type}.`);advanceAIWicket()}
-  else{
-    game.aiScore+=runs;
-    if([1,3,5].includes(runs))swapAIStrike();
-    $("aiDecision").textContent=`AI played ${aiShot.toUpperCase()} • required RR ${required.toFixed(2)} • ${b.name} ${b.form} form`;
-    setPhaseText(`${b.name}: ${runs===0?"dot ball":runs===4?"FOUR":runs===6?"SIX":`${runs} run${runs>1?"s":""}`}.`);
-  }
+  if(wicket){game.aiWickets++;setPhaseText(`${d.desc} • OUT! ${b.name} is beaten by your ${type}.`);advanceAIWicket()}
+  else{game.aiScore+=runs;if([1,3,5].includes(runs))game.aiOnStrike=!game.aiOnStrike;$("aiDecision").textContent=`AI played ${aiShot.toUpperCase()} • required RR ${required.toFixed(2)} • ${b.name} ${b.form} form`;setPhaseText(`${b.name}: ${runs===0?"dot ball":runs===4?"FOUR":runs===6?"SIX":`${runs} run${runs>1?"s":""}`}.`)}
   if(game.aiScore>=game.target||game.aiBalls>=120||game.aiWickets>=10){finishMatch();return}
-  if(game.aiBalls%6===0){swapAIStrike();game.overNumber++;setPhaseText(`OVER ${game.overNumber} COMPLETE • New over, strike rotated. ${Math.max(0,game.target-game.aiScore)} needed.`)}
-  updateMatchUI();
+  if(game.aiBalls%6===0){game.aiOnStrike=!game.aiOnStrike;game.overNumber++;setPhaseText(`OVER ${game.overNumber} COMPLETE • New over, strike rotated. ${Math.max(0,game.target-game.aiScore)} needed.`)}updateMatchUI();
 }
 function advanceAIWicket(){if(game.aiWickets>=10)return;game.aiBatterIndex=Math.min(10,game.aiWickets);game.aiBatter=AI_BATTERS[game.aiBatterIndex]||AI_BATTERS[10];const next=Math.min(10,game.aiBatterIndex+1);game.aiNon=AI_BATTERS[next]||AI_BATTERS[1];game.aiOnStrike=true;$("aiDecision").textContent=`${game.aiBatter.name} walks in • ${game.aiBatter.role} • AI changes plan.`}
 function finishMatch(){
-  if(!game||game.finished)return;game.finished=true;const win=game.aiScore<game.target;
-  career.applyMatch({win,runs:game.playerRuns,balls:game.playerBalls,wickets:game.bowlWickets,catches:game.catches,sixes:game.sixes,fours:game.fours,opponent:game.opponent.name,dismissed:game.playerOut});
-  renderAll();$("resultIcon").textContent=win?"🏆":"💪";$("resultTitle").textContent=win?"MATCH WON!":"MATCH LOST";$("resultText").textContent=win?`${career.player.name}'s XI defended ${game.target-1} against ${game.opponent.name}.`:`${game.opponent.name} chased ${game.target} with ${Math.max(0,120-game.aiBalls)} balls remaining.`;$("resultStats").innerHTML=[["Your runs",game.playerRuns],["Team score",game.target-1],["AI score",game.aiScore],["AI wickets",game.aiWickets],["Balls",game.playerBalls],["Fours / Sixes",`${game.fours}/${game.sixes}`],["Form",Math.round(career.player.form)],["Fitness",Math.round(career.player.fitness.condition)]].map(x=>`<div class="resultStat"><small>${x[0]}</small><b>${x[1]}</b></div>`).join("");$("matchResult").classList.add("show");cinematicCamera(0);
+  if(!game||game.finished)return;game.finished=true;const win=game.aiScore<game.target;career.applyMatch({win,runs:game.playerRuns,balls:game.playerBalls,wickets:game.aiWickets,catches:game.catches,sixes:game.sixes,fours:game.fours,opponent:game.opponent.name,notOut:!game.playerOut});renderAll();$("resultIcon").textContent=win?"🏆":"💪";$("resultTitle").textContent=win?"MATCH WON!":"MATCH LOST";$("resultText").textContent=win?`${career.player.name}'s XI defended ${game.target-1} against ${game.opponent.name}.`:`${game.opponent.name} chased ${game.target} with ${Math.max(0,120-game.aiBalls)} balls remaining.`;$("resultStats").innerHTML=[["Your runs",game.playerRuns],["Team score",game.target-1],["AI score",game.aiScore],["AI wickets",game.aiWickets],["Balls",game.playerBalls],["Fours / Sixes",`${game.fours}/${game.sixes}`],["Form",Math.round(career.player.form)],["Fitness",Math.round(career.player.fitness.condition)]].map(x=>`<div class="resultStat"><small>${x[0]}</small><b>${x[1]}</b></div>`).join("");$("matchResult").classList.add("show");cinematicCamera(0);
 }
 
 function renderLoop(){if(!renderer||!scene)return;const dt=Math.min(clock.getDelta(),.04);updateAnimation(dt);updateCamera(dt);const t=clock.elapsedTime;three.players.forEach((p,i)=>{if(!p.userData.busy&&!anim.active){const l=p.getObjectByName("legL"),r=p.getObjectByName("legR");if(l)l.rotation.x=Math.sin(t*p.userData.speed+i)*.035;if(r)r.rotation.x=-Math.sin(t*p.userData.speed+i)*.035;p.rotation.z=Math.sin(t*.8+i)*.006}});renderer.render(scene,camera)}

@@ -1,4 +1,3 @@
-// REAL CRICKET CAREER V7 DATA — backward-compatible gameplay data
 export const TEAMS=[
  {name:"Academy XI",strength:56,color:0x31d98a},
  {name:"City Warriors",strength:61,color:0x4bb4ff},
