@@ -9,6 +9,7 @@ const DEFAULT_PLAYER={
   fitness:{condition:92,fatigue:0,injury:null},
   season:{number:1,matches:0,runs:0,wins:0,goalMatches:8,goalRuns:250,goalWins:4},
   awards:[],relationships:{coach:62,captain:55,team:58},
+  world:{rival:{name:"Rohan Das",runs:0,matches:0,wins:0,form:61},league:{points:0,played:0,wins:0,losses:0,nrr:0}},
   recent:[],news:["Welcome to Academy XI. Your professional journey starts now.","Selectors have added you to the Academy watchlist."]
 };
 function deepClone(x){return JSON.parse(JSON.stringify(x))}
@@ -20,6 +21,7 @@ function mergePlayer(raw){
   p.fitness={...DEFAULT_PLAYER.fitness,...(raw?.fitness||{})};
   p.season={...DEFAULT_PLAYER.season,...(raw?.season||{})};
   p.relationships={...DEFAULT_PLAYER.relationships,...(raw?.relationships||{})};
+  p.world={...DEFAULT_PLAYER.world,...(raw?.world||{}),rival:{...DEFAULT_PLAYER.world.rival,...(raw?.world?.rival||{})},league:{...DEFAULT_PLAYER.world.league,...(raw?.world?.league||{})}};
   p.awards=[...(raw?.awards||[])];p.recent=[...(raw?.recent||[])];p.news=[...(raw?.news||DEFAULT_PLAYER.news)];
   return p;
 }
@@ -73,6 +75,7 @@ export class Career{
     p.season.matches++;p.season.runs+=result.runs;p.season.wins+=result.win?1:0;
     p.money+=result.win?180:70;p.energy=Math.max(10,p.energy-25);p.fitness.condition=Math.max(15,p.fitness.condition-10);p.fitness.fatigue=Math.min(100,p.fitness.fatigue+18);
     p.form=Math.max(20,Math.min(99,p.form+(result.win?4:result.runs>=50?3:-2)));
+    this.advanceWorld(result);
     const repGain=result.win?3:result.runs>=50?2:1;p.reputation.local=Math.min(100,p.reputation.local+repGain);if(p.overall>=60)p.reputation.domestic=Math.min(100,p.reputation.domestic+repGain*.55);
     if(p.overall>=70)p.reputation.franchise=Math.min(100,p.reputation.franchise+repGain*.35);if(p.overall>=80&&p.season.wins>=3)p.reputation.international=Math.min(100,p.reputation.international+repGain*.2);
     p.reputation.fans=Math.min(100,p.reputation.fans+(result.win?4:1)+Math.floor(result.runs/50));
@@ -86,7 +89,18 @@ export class Career{
     p.news.unshift(result.win?"🏆 Match win boosts your reputation and selection chances.":"📋 Coaches have added notes to your performance report.");p.news=p.news.slice(0,10);
     p.recent.unshift(result);p.recent=p.recent.slice(0,10);this.save()
   }
-  nextSeason(){const p=this.player;p.season={number:p.season.number+1,matches:0,runs:0,wins:0,goalMatches:8+p.season.number*2,goalRuns:250+p.season.number*100,goalWins:4+p.season.number,goalComplete:false};p.news.unshift(`🚀 Season ${p.season.number} begins. New targets are live.`);p.energy=Math.min(100,p.energy+45);p.fitness.condition=Math.min(100,p.fitness.condition+35);p.fitness.fatigue=Math.max(0,p.fitness.fatigue-40)}
+  advanceWorld(result){
+    const p=this.player,w=p.world;
+    w.rival.matches++;w.rival.runs+=Math.max(0,Math.round(18+Math.random()*62+(w.rival.form-60)*.35));
+    w.rival.wins+=Math.random()<(.48+(w.rival.form-60)*.006)?1:0;
+    w.rival.form=Math.max(35,Math.min(95,w.rival.form+(Math.random()-.42)*5));
+    w.league.played++; if(result.win){w.league.wins++;w.league.points+=2}else w.league.losses++;
+    w.league.nrr=Number(Math.max(-3,Math.min(4,(w.league.wins*1.18-w.league.losses*.72))).toFixed(2));
+    if(p.stats.matches>0 && p.stats.matches%4===0){
+      p.news.unshift(`📰 Rival watch: ${w.rival.name} has ${w.rival.runs} runs in ${w.rival.matches} matches this season.`);
+    }
+  }
+  nextSeason(){const p=this.player;p.world.league={points:0,played:0,wins:0,losses:0,nrr:0};p.season={number:p.season.number+1,matches:0,runs:0,wins:0,goalMatches:8+p.season.number*2,goalRuns:250+p.season.number*100,goalWins:4+p.season.number,goalComplete:false};p.news.unshift(`🚀 Season ${p.season.number} begins. New targets are live.`);p.energy=Math.min(100,p.energy+45);p.fitness.condition=Math.min(100,p.fitness.condition+35);p.fitness.fatigue=Math.max(0,p.fitness.fatigue-40)}
   createOffer(){
     const p=this.player;
     const offers=[];
@@ -94,7 +108,9 @@ export class Career{
     if(p.overall>=58)offers.push({team:"Capital Strikers",role:"Batting All-Rounder",money:1800,level:"Domestic"});
     if(p.overall>=65)offers.push({team:"Riverside Royals",role:"Opening Batter",money:2600,level:"Franchise"});
     if(p.overall>=75)offers.push({team:"Metro Titans",role:"Top Order All-Rounder",money:4200,level:"Franchise Elite"});
-    return offers[Math.min(offers.length-1,Math.floor(p.overall/20))]||offers[0]||{team:"Academy XI",role:p.role,money:500,level:"Academy"}
+    if(!offers.length)return {team:"Academy XI",role:p.role,money:500,level:"Academy"};
+    const idx=p.overall>=75?offers.length-1:p.overall>=65?Math.min(offers.length-1,2):p.overall>=58?Math.min(offers.length-1,1):0;
+    return offers[idx]
   }
   acceptOffer(offer){const p=this.player;p.team=offer.team;p.role=offer.role;p.money+=offer.money;p.contract=`${offer.level} Professional Contract`;if(offer.level.includes("Franchise"))p.reputation.franchise=Math.max(p.reputation.franchise,35);p.news.unshift(`✍️ Signed with ${offer.team} on a ${offer.level} deal.`);this.save()}
 }
