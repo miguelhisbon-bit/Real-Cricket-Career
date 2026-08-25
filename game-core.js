@@ -4,6 +4,7 @@ import {TEAMS,SHOTS,BOWLS,AI_BATTERS,AI_BOWLERS,PITCHES,CONDITIONS,FIELDS} from 
 
 const career=new Career(),$=id=>document.getElementById(id),screens=[...document.querySelectorAll(".screen")];
 let scene,camera,renderer,clock,game=null,lastMatchStart=0,cameraMode=0,cameraTween=null;
+let paused=false,autoPlayMode=false,autoTimer=null,matchLock=false;
 const three={players:[],fielders:[],ball:null,batter:null,bowler:null,umpires:[],wickets:[]};
 let anim={active:false,t:0,dur:0,type:"",from:null,to:null,done:null,player:null};
 const SHOT_NAMES={defend:"DEFENCE",drive:"FRONT-FOOT DRIVE",cut:"SQUARE CUT",pull:"PULL SHOT",loft:"LOFTED DRIVE"};
