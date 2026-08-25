@@ -1,4 +1,11 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+let THREE=null;
+const THREE_CDN="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+async function loadThree(){
+  if(THREE) return THREE;
+  const mod=await import(THREE_CDN);
+  THREE=mod;
+  return THREE;
+}
 import {Career,fmt} from "./career.js";
 import {TEAMS,SHOTS,BOWLS,AI_BATTERS,AI_BOWLERS,PITCHES,CONDITIONS,FIELDS} from "./data.js";
 
@@ -237,17 +244,23 @@ function launchBall(runs,wicket,shotType="drive",fromBatting=false){
 
 /* --------------------------- MATCH LOGIC --------------------------- */
 function overString(balls){return `${Math.floor(balls/6)}.${balls%6}`}function rr(runs,balls){return balls?((runs/(balls/6))).toFixed(2):"0.00"}
-function startMatch(){
+async function startMatch(){
   clearAutoTimer();paused=false;autoPlayMode=false;matchLock=false;
   const opponent=TEAMS[1+Math.floor(Math.random()*3)],bowl=AI_BOWLERS[Math.floor(Math.random()*AI_BOWLERS.length)];
   const pitch=PITCHES[Math.floor(Math.random()*PITCHES.length)],condition=CONDITIONS[Math.floor(Math.random()*CONDITIONS.length)],fixture=career.getNextFixture();
   game={innings:1,phase:"bat",balls:0,runs:0,wickets:0,playerRuns:0,playerBalls:0,teammateRuns:0,teammateBalls:0,fours:0,sixes:0,bowlWickets:0,catches:0,target:null,opponent,teammateName:"Rahul Sen",userStriker:true,playerOut:false,overNumber:0,ballInOver:0,finished:false,aiScore:0,aiWickets:0,aiBalls:0,aiBatterIndex:0,aiOnStrike:true,aiBatter:AI_BATTERS[0],aiNon:AI_BATTERS[1],aiBowler:bowl,field:"balanced",pitch,condition,fixture,teamBatters:[career.player.name,"Rahul Sen","Aman Roy","Rafi Khan","Nabil Hasan","Sohan Das","Imran Ali","Rifat Chowdhury","Arif Noor","Tanim Ahmed","Shuvo Paul"],matchStart:Date.now()};
   lastMatchStart=Date.now();resetBallFeed();$("matchResult").classList.remove("show");
   if(renderer===undefined||!renderer){
-    try{ init3D(); document.body.classList.remove("no3d"); $("fallbackCanvas")?.classList.remove("show"); }catch(err){
+    try{
+      await loadThree();
+      init3D();
+      document.body.classList.remove("no3d");
+      $("fallbackCanvas")?.classList.remove("show");
+    }catch(err){
       console.warn("3D engine unavailable; switching to safe 2D match view.",err);
       renderer=null; scene=null; camera=null; clock=null;
       document.body.classList.add("no3d");
+      setPhaseText("3D engine unavailable • Safe 2D match view is active. The match is still fully playable.");
       setupFallbackCanvas();startFallbackLoop();
     }
   }

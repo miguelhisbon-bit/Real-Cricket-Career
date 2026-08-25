@@ -19,7 +19,7 @@ function bootError(err){
 async function loadCore(){
   setProgress(18);
   message&&(message.textContent="Loading career data • preparing match engine");
-  await import("./game-core.js");
+  await import("./game-core.js?v=9.1");
   setProgress(88);
   finish();
 }
