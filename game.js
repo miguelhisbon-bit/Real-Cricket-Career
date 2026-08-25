@@ -5,7 +5,7 @@ const SAVE_KEY="real_cricket_career_v9";
 let career=loadCareer();
 let match=null,renderRAF=0,lastFrame=performance.now(),anim=null;
 
-function loadCareer(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));return s&&s.player?s:{player:{...D.player}}}catch{return {player:{...D.player}}}}
+function loadCareer(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));const c=s&&s.player?s:{...D.player};const id=JSON.parse(localStorage.getItem("rcc_v10_player")||"null");if(id&&id.name)c.name=id.name;return {player:{...D.player,...c}}}catch{return {player:{...D.player}}}}
 function saveCareer(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(career))}catch(e){}}
 function overText(){return `${Math.floor(match.balls/6)}.${match.balls%6}`}
 function rr(){return match.balls?((match.score/(match.balls/6))||0).toFixed(2):"0.00"}

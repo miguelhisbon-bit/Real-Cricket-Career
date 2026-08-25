@@ -4,10 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#04101a">
-<title>Real Cricket Career — V9</title>
+<title>Real Cricket Career — V10</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="loadingScreen" class="loading-screen"><div class="loading-orb">🏏</div><div class="loading-kicker">REAL CRICKET STUDIO</div><h1>REAL CRICKET <b>CAREER</b></h1><p>Loading your cricket universe…</p><div class="loading-track"><i id="loadingBar"></i></div><small>3D MATCH ENGINE · CAREER MODE</small></div>
+<div id="loginScreen" class="login-screen hidden"><div class="login-glow"></div><div class="login-card"><div class="login-logo">🏏</div><span class="login-kicker">PLAYER ID</span><h2>Enter the arena.</h2><p>Create your local career profile and continue your journey.</p><label>PLAYER NAME<input id="loginName" maxlength="18" placeholder="Enter your name"></label><button id="loginBtn" class="login-btn">CREATE CAREER <span>→</span></button><button id="guestBtn" class="guest-btn">Continue as Saikat</button><small>Saved privately on this device · no account required</small></div></div>
 <div id="app">
 <header class="topbar">
   <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
@@ -106,8 +108,8 @@
 <main id="statsScreen" class="screen sub-screen"><button class="back" data-home>← HOME</button><h2>Stats & Records</h2><div class="record-grid"><div>Runs <b id="statRuns">78</b></div><div>Matches <b id="statMatches">1</b></div><div>Best <b id="statBest">78</b></div><div>4s <b id="fours">8</b></div><div>6s <b id="sixes">3</b></div><div>Form <b id="form">68</b></div></div></main>
 <main id="trainingScreen" class="screen sub-screen"><button class="back" data-home>← HOME</button><h2>Training Hub</h2><div class="training-grid"><button data-train="bat">🏏<b>Batting Nets</b><small>Timing + power</small></button><button data-train="bowl">🎯<b>Bowling</b><small>Control + variation</small></button><button data-train="field">🧤<b>Fielding</b><small>Reflex + throwing</small></button><button data-train="fit">⚡<b>Fitness</b><small>Stamina + recovery</small></button></div></main>
 
-<nav class="bottom-nav"><button class="active" data-screen="home">⌂<small>Home</small></button><button data-screen="career">♟<small>Career</small></button><button id="navPlay">🏏<small>Play</small></button><button data-screen="statsScreen">▥<small>Stats</small></button><button id="navTrain">⚡<small>Train</small></button></nav>
+<div class="home-marquee"><span>⚡ LIVE FORM</span><b>Keep your rhythm high to unlock Domestic Cricket</b><i>→</i></div><nav class="bottom-nav"><button class="active" data-screen="home">⌂<small>Home</small></button><button data-screen="career">♟<small>Career</small></button><button id="navPlay">🏏<small>Play</small></button><button data-screen="statsScreen">▥<small>Stats</small></button><button id="navTrain">⚡<small>Train</small></button></nav>
 </div>
-<script src="data.js"></script><script src="game.js"></script>
+<script src="data.js"></script><script>(function(){const l=document.getElementById("loadingScreen"),g=document.getElementById("loginScreen"),a=document.getElementById("app"),b=document.getElementById("loadingBar");a.classList.add("app-locked");let n=0,t=setInterval(()=>{n=Math.min(100,n+Math.random()*18+8);b.style.width=n+"%";if(n>=100){clearInterval(t);setTimeout(()=>{l.classList.add("done");let p=null;try{p=JSON.parse(localStorage.getItem("rcc_v10_player")||"null")}catch(e){}if(p&&p.name){document.getElementById("loginName").value=p.name;g.classList.add("hidden");a.classList.remove("app-locked")}else g.classList.remove("hidden")},250)}},90);function enter(x){x=(x||"Saikat").trim()||"Saikat";localStorage.setItem("rcc_v10_player",JSON.stringify({name:x,created:Date.now()}));document.getElementById("playerName").textContent=x.toUpperCase();g.classList.add("leaving");setTimeout(()=>{g.classList.add("hidden");a.classList.remove("app-locked")},350)}document.getElementById("loginBtn").onclick=()=>enter(document.getElementById("loginName").value);document.getElementById("guestBtn").onclick=()=>enter("Saikat")})();</script><script src="game.js"></script>
 </body>
 </html>
