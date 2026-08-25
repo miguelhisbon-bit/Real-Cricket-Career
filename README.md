@@ -1,46 +1,12 @@
-# Real Cricket Career V8 — Elite Edition
+REAL CRICKET CAREER V7 — FULL iPHONE COPY
 
-## 🏏 Complete 3D Cricket Career Game
+V7 includes: career progression, season goals, selection hub, contracts, reputation, fitness/fatigue/injury, awards, dynamic news, training/recovery, persistent career save, plus upgraded procedural Three.js player models, kit details, stadium presentation, lighting, camera modes, field, umpires, playable T20 match logic, accurate batting average/dismissal tracking, correct bowling wicket stats, season goal completion, and smarter AI strike rotation.
 
-### Features Added in V8:
-- ✅ All bugs fixed (match finish, null references, camera leak)
-- ✅ Glass-morphism UI
-- ✅ Particle effects (boundaries, wickets, sixes)
-- ✅ Momentum system with visual meter
-- ✅ Weather system (4 conditions affecting gameplay)
-- ✅ Player personality system
-- ✅ Color-coded commentary
-- ✅ Form history graph
-- ✅ Training timing mini-game
-- ✅ Animated LED boundary rope
-- ✅ Animated crowd
+COPY FILES
+1. CODE_TO_COPY_HTML.txt -> index.html
+2. CODE_TO_COPY_CSS.txt -> style.css
+3. CODE_TO_COPY_GAME_JS.txt -> game.js
+4. CODE_TO_COPY_DATA_JS.txt -> data.js
+5. career.js -> career.js
 
-### How to Play:
-1. Open `index.html` in a modern browser
-2. Create your player (name, role, personality)
-3. Play matches, train skills, earn contracts
-4. Build your career from Academy to International
-
-### Controls:
-- **Batting**: Click shot buttons (DEFEND, DRIVE, CUT, PULL, LOFT)
-- **Bowling**: Click bowl types (YORKER, LENGTH, BOUNCER, SLOWER)
-- **Camera**: Use VIEW and WIDE buttons
-- **Training**: Click timing challenge when marker is in green zone
-
-### Career Features:
-- 11 vs 11 3D matches
-- Full T20 gameplay
-- Skill development
-- Reputation system
-- Contract offers
-- Season targets
-- Awards & milestones
-
-### Tech Stack:
-- Three.js (3D rendering)
-- Vanilla JS
-- LocalStorage (career save)
-- CSS Glass-morphism
-- Web Audio Ready
-
-### Files:
+No build step is required. GitHub Pages can serve the project as static files. The 3D engine loads Three.js from jsDelivr at runtime.
